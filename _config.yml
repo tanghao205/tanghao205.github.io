@@ -108,7 +108,7 @@ analytics:
 # Site Author
 author:
   name             : "Hao Tang"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/images/bio.jpg"
   bio              : "Computer Science, Data Science"
   location         : "Houston, TX"
   email            :
