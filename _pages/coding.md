@@ -4,7 +4,7 @@ permalink: /coding/
 title: "coding"
 author_profile: true
 header:
-  image: "/images/test.jpg"	
+  image: "/images/H1.jpg"	
 
 ---
                      
