@@ -8,12 +8,7 @@ header:
   image: "/images/H3.jpg"	
 
 ---
-<style type="text/css">
-h1.title {
-  font-size: 38px;
-  color: DarkRed;
-}
-</style>
+
 
 
 # Wine Review Learning and Recomdation
