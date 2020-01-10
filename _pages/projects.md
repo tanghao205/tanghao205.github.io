@@ -17,6 +17,17 @@ header:
 
 # Skin Cancer Diagnosis Learning
 
+Skin cancer, as the abnormal growth of skin cell is one of the most common cancer in the united states. The curing effect to
+it is based on detection in the early stage. Regular skin self-exams is very important to detect skin cancer. This machine learning project is to explore the detection methods according to skin cancer lesion area with different learning models. The project has two sections. The first part is to fit three classifiers on the skin cancer image, and analyze the prediction result. Below are the learning mothods:  
+
+- K-Nearest-Neighbors
+- Support Vector Machine
+- Random Forest
+
+The second part is to extract visible features from the images after effective image processing, then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
+
+- Logistic Regression
+- Decision Tree
 
 <figure class="half">
     <a href="/images/SVM.JPG"><img src="/images/SVM.JPG"></a>
