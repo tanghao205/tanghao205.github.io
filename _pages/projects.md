@@ -23,7 +23,7 @@ header:
     <a href="/images/K_means.JPG"><img src="/images/K_means.JPG"></a>   
 </figure>
 
-[Report](/images/SVM.JPG)
+[Report](/Documents/Project_Skin-Cancer-Diagnosis.pdf)
 
 
 # Adversarial Learning
