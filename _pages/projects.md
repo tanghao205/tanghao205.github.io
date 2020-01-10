@@ -35,7 +35,7 @@ The second part is to extract visible features from the images after effective i
 - Decision Tree
 
 <figure>
-    <a href="/images/ImageProcessing.jpg"><img src="/images/ImageProcessing.jpg"></a>
+    <a href="/images/ImageProcessing.jpg"><img src="/images/ImageProcessin.jpg"></a>
 </figure>
 
 
