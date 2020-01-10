@@ -2,6 +2,7 @@
 title: "about"
 permalink: /about/
 layout: archive
+author_profile: true
 header:
   image: "/images/H2.jpg"
 
