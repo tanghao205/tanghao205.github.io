@@ -9,6 +9,10 @@ header:
 
 ---
 
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+}
 
 The following projects include the major interesting field in my computer science study.  
 - Practical Learning
