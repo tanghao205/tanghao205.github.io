@@ -1,5 +1,5 @@
 ---
-layout: archive
+layout: single
 classes: wide
 permalink: /projects/
 title: "projects"
