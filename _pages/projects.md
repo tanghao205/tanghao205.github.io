@@ -11,9 +11,14 @@ header:
 
 
 The following projects include the major interesting field in my computer science study.  
+- Practical Learning
 
 
-# Practical Learning
+# Wine Review Learning and Recomdation
+
+
+
+# Skin Cancer Diagnosis Learning
 
 
 <figure class="half">
@@ -25,7 +30,7 @@ The following projects include the major interesting field in my computer scienc
 
 
 
-# Applied Machine Learning
+# Adversarial Learning
 
 
 # Data Visualization
