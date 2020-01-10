@@ -20,8 +20,8 @@ header:
 
 <figure class="half">
     <figcaption>Learning</figcaption>
-    <a href="/assets/images/image-filename-1-large.jpg"><img src="/images/20141121_082628.jpg"></a>
-    <a href="/assets/images/image-filename-2-large.jpg"><img src="/images/20141121_082632.jpg"></a>   
+    <a href="/images/20141121_082628.jpg"><img src="/images/20141121_082628.jpg"></a>
+    <a href="/images/20141121_082632.jpg"><img src="/images/20141121_082632.jpg"></a>   
 </figure>
 
 
