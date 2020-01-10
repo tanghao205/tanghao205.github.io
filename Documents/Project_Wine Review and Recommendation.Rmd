@@ -1,0 +1,548 @@
+---
+title: 'Wine Review and Recommendation'
+date: ' '
+author: "Hao Tang"
+geometry: margin = 0.55in
+documentclass: article
+indent: true 
+classoption: oneside
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+
+    
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(include = TRUE)  # TRUE for solution; FALSE for questions set
+
+  knitr::opts_chunk$set(echo = TRUE)
+  knitr::opts_chunk$set(message = FALSE)
+  knitr::opts_chunk$set(warning = FALSE)
+  knitr::opts_chunk$set(fig.height = 6, fig.width = 8, out.width = '50%', fig.align = "center")
+  options(width = 90)
+```
+
+```{css, echo=FALSE}
+.solution {
+background-color: #e6ffe6;
+}
+```
+
+```{r include=FALSE}
+rm(list = ls(all = TRUE))
+
+list.of.packages <- c("knitr", "tidyverse", "ggpubr", "ggplot2", "data.table", "ranger", "glmnet", "gbm", "readr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)){
+  install.packages(new.packages, repos = "http://cran.us.r-project.org")
+  }
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(readr)
+library(data.table)
+library(glmnet)
+library(ranger)
+library(gbm)
+
+```
+
+## **I. Project Description and Summary**  
+### a) Project Summary  
+     
+&nbsp;&nbsp;&nbsp;&nbsp;Wine Enthusiast is a leading multichannel marketer to growing wine products. At 1988, Wine Enthusiast founded Wine Enthusiast Magazine which brings consumers vital information on the world of wine. Their wine trend, rating and review data to diversified wine is well analyzed in multiple data science forum. This project is to explore the regression models to the review points from some famous and professional wine tasters. I am interested in the points prediction based on the producing location, price, winery information. Here I will use random forest and boosting model in the project. Simulataneously, I'll  investigate Pinor Noir with specific contraints so that customer can find the most approriate choice to this wine with more convinience in the variable market.  
+
+### b) Dataset  
+
+```{r include=FALSE}
+
+winemag <- read_csv("H:/UIUC MCS-DS/1_Pratical Statistical Learning/Project/Individual/winemag-data-130k-v2.csv",
+    na = "null", col_types = cols(.default = "c", points = "d", price = "d"))
+
+winemag[is.na(winemag[,6]),6] = 0
+
+winemag = setDT(winemag)  # Set data.table
+
+setnames(winemag, "X1", "id")
+
+wine = setDF(winemag)
+
+wine[wine$taster_name == "", 10] = 'Others'
+
+nrow = dim(wine)[1]
+
+country.qty = length(table(wine$country))
+taster.qty = length(table(wine$taster_name))
+province.qty = length(table(wine$province))
+region_1.qty = length(table(wine$region_1))
+region_2.qty = length(table(wine$region_2))
+variety.qty = length(table(wine$variety))
+winery.qty = length(table(wine$winery))
+
+#price != 0# # province != ''
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;The dataset being analyzed in this project is zackthoutt's `winemag-data-130k-v2` updated on Nov 24th, 2017. It has **`r nrow`** reviews with detailed comment from the taster and their twitter handle. Here is the **`r dim(wine)[2]`** columns in the dataset: **id**(This column name is added by me for efficient tracking), **country**, **description**, **designation**(the grape vineyard), **points**, **price**, **province**, **regoin_1**, **region_2**(region_1 and region_2 are the detailed infomation to the producin location, the latter column can be treated as extension), **taster_name**, **taster_twitter_handle**, **title**(closely related to the wine variety and vintage), **variety**, **winery**. 
+
+## **II. Data Processing**
+
+&nbsp;&nbsp;&nbsp;&nbsp;After loading the dataset, **id** is assigned to the first column. There are quite a few of NA value in the **price** column so I replace the 'NA' with '0' but this replacement is just for indication and the zero value shouldn't be part of the model processing. Meanwhile, some of the review is lack of the taster's name, thus the consistent 'others' will be assigned to **taster_name** column accordingly. In the following model processing, I excluded the following column: **id**, **country**, **description**, **designation**, **region_1**, **region_2**, **taster_twitter_handle** and **title**. Apprarently **id** will not help in our procedure. **description** shall be useful in data mining but it's not a efficient predictor to the response **points** in our models and it has quite a few of exactly duplicated value. **designation** is with `37465` empty elements and it has ``r length(table(wine$designation))`` different values so it's not a good choice to our models. **country**, **province**, **region_1** and **region_2** are highly geographically related to each other. Considering `r sum(wine$region_1 == '')` empty elements in  **region_1** and `r sum(wine$region_2 == '')` empty elements in **region_2**, our choice can be focus on **country** and **province**. **province** is more detailed than **country** especial to the major wine country, such the U.S., which has multiple producing province nationwide. Thus, only **province** is applied in these four columns in our model analysis. **taster_twitter_handle** is not informative and **title** is too specific to the wine itself so they're not included. **winery** has ``r winery.qty`` values so it won't be included but it will be applied in our Pinot Noir analysis. 
+
+Once we have the targeted columns, we can start to browse their value distribution. The quantity of values to the interesting column are display in Table 1. There are too many levels to most of these columns thus the model based on all of these levels will be inefficient and very unstable. After more investegation, I found small set of the values of each column have composed the great portion of the whole reviews based on the elements quantity. Table 2 shows the top values in each column and the elements percentage with these values. Please notice there are `~20%` elements in **taster_name** is missing value. The following model analysis will be based on the interesting columns with these values` factor form.  
+
+```{r echo=FALSE}
+display.1 = matrix(c(taster.qty-1, province.qty, variety.qty),ncol = 3)
+colnames(display.1) =  c('taster_name','province','variety')
+rownames(display.1) = c('Qty of Columns')
+kable(display.1, format = "latex", align = 'c', 
+      caption = 'Values Quantity of interesting Columns')
+
+percent.provice.top25 = sum(sort(table(wine$province),decreasing = T)[1:25]) / dim(wine)[1]
+percent.variety.top25 = sum(sort(table(wine$variety),decreasing = T)[1:25]) / nrow
+percent.taster.top10 = sum(sort(table(wine$taster_name),decreasing = T)[2:11]) / nrow
+
+display.2 = matrix(c(percent.taster.top10, percent.provice.top25, percent.variety.top25),ncol = 3)
+colnames(display.2) =  c('taster_name_top10','province_top25','variety_top25')
+rownames(display.2) = c('Percentage of All Reviews')
+kable(display.2, format = "latex", align = 'c', 
+      caption = 'Values Percentage of All Reviews')
+```
+
+
+## **III. Summaries of Data** 
+
+```{r echo=FALSE, fig.height=7, fig.width = 16, out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+variety.top25 = names(sort(table(wine$variety),decreasing = T)[1:25])
+provice.top25 = names(sort(table(wine$province),decreasing = T)[1:25]) 
+
+provice.top20 = names(sort(table(wine$province),decreasing = T)[1:20]) 
+
+taster.top10 = names(sort(table(wine$taster_name),decreasing = T)[2:11])
+
+# wine.subset = wine[wine$taster_name != 'others' & wine$province %in% provice.top25 & wine$variety %in% variety.top25 & wine$price != 0,]
+
+wine.subset = wine[wine$taster_name %in% taster.top10 & wine$province %in% provice.top25 & wine$variety %in% variety.top25 & wine$price != 0,]
+
+n.subset = dim(wine.subset)[1]
+
+wine.subset$province = as.factor(wine.subset$province)
+wine.subset$taster_name = as.factor(wine.subset$taster_name)
+wine.subset$variety = as.factor(wine.subset$variety)
+# wine.subset = wine.subset[wine.subset$price<=200,]
+```
+
+
+```{r echo=FALSE, fig.height=7, fig.width = 16, out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+country.subset.qty = sort(table(wine.subset$country), decreasing = T)
+taster.subset.qty = sort(table(wine.subset$taster_name), decreasing = T)
+
+par(mfrow=c(1,2))
+pie.slice = paste(names(country.subset.qty), "(", round(country.subset.qty/sum(country.subset.qty),2)*100, '%)', sep="")
+pie(x = sort(table(wine.subset$country), decreasing = T), 
+    labels = pie.slice, 
+    col = rainbow(length(table(wine.subset$country))),
+    main = 'Figure 1. Wine Percentage on All Countries in Final Dataset',      cex.main = 1.5)
+legend("topright",
+       legend = names(sort(table(wine.subset$country), decreasing = T)), 
+       fill = rainbow(length(table(wine.subset$country))))
+
+hist(wine.subset$price, breaks = 800, main = 'Figure 2. Histogram for the Wine Price in Final Dataset', xlim = c(0,500), xlab = 'Wine Price', cex.main = 1.5)
+```
+  
+Let's investigate our processed data before starting the regression model analysis. Remember we have replace the NA value with `0` in **price** column, our final dataset will exclude the zero price review accordingly since these reviews will become noise to our data. Also, the final model will be generated only by the following predictors: **price**, **province**, **taster_name**, **vareity**.The **points** is response. As stated in last part, the criteria includes top 10 tasters, top 25 wine produsing province and top 25 wine variety. Our regression model will be based on all ``r n.subset`` reviews in this dataset. Comparing to the average point(``r round(mean(wine$points),2)``) in the original dataset, the final dataset's average points (``r round(mean(wine.subset$points),2)``) is very similar and their quantile barely have difference. This is good because we want the model constructed on the processed dataset can somehow closely related to the orginal dataset. In the final dataset, all the reviews are from `7` countries' wine (Figure 1) and all these countries are also the top 10 produsing countries in the orginal dataset. That being said, wine industry is pretty concentrated in specific area in the world. And Figure 2 shows that the price distribution. It is similar to that of orginal datast too, less than `1%` of all the wine is with the price higher than `200`.  
+
+In the four predictors selected in the model analysis, three of them are character variables with 10 to 25 levels, which means regular linear regression, polynomial regression, logistic regression or kernel regression wouldn't be a good fit to the model candidate here. The tree models should be more efficient to our final dataset after transforming all character variables to factor variable. For another, I also want to lower the variance while construct the models. So random forest and boosting could be the reasonable choice here. One may also brings up ridge/lasso regression that can also deal with character variable by matrix transformation. I will also present the result from the lasso regression after the random forest and boosting model for comparison. 
+
+
+
+## **IV. Model Analysis** 
+
+### Random Forest  
+  
+&nbsp;&nbsp;&nbsp;&nbsp;Random Forest is efficient model to multiple type of dataset and it should be a reasonable choice in our mixed variable in the project. This model apply bagging or bootstrap aggregating idea and construct many decision trees (forest) from bagging. When we make prediction on a datapoint/observation, the regression result will be generated by the trees' result averaging. The most important advantage of random forest is the correlation reduction design in the model fitting process. In each node when we want to grow the tree, only some of the variables (**mtry** as below analysis) will be selected as candidates randomly. We then chooce the best split value in these candidates as the criteria for the next level's tree. This process will be processed recursively in each level of the tree until we hit the maximum depth (**max.depth** as below anlaysis) or minimum node size of assigned observations. For another, we can always increase the depth of each tree to decrease the bias which will improve the final prediction accuracy just like ordinary decision tree. But with random forest, it's relatively unlikely to overfit the model like the ordinary dicision tree model.   
+
+In this project, I choose different values of **mtry** and **max.depth** for comparison and we will see the prediction accuracy evolution with different combination of the parameters. One of the important feature of random forest model is its out-of-bag (OOB) error estimate. This OOB error estimate is pretty close to N-fold cross-validaion performed during model construction. I will also compare the OOB prediction mean squred error(MSE) to the generated testing set. 
+
+```{r echo=FALSE}
+##Random Forest  OOB prediction error is good enough, no need to do cv
+
+set.seed(1)
+train = sample(dim(wine.subset)[1], round(dim(wine.subset)[1] * 0.8,0)) 
+subset.train = wine.subset[train,]
+subset.test = wine.subset[-train,]
+# b = Sys.time()
+
+mtry = c(1,2,3)
+max.depth = c(4,6,8)
+factor.list = list()
+count = 1
+for (i in mtry){
+  for (j in max.depth){
+    factor.list[[count]] = c(i,j)
+    count = count + 1
+  }
+}
+
+rf.mse = function(subset.train, subset.test, factor.list){
+# mtry larger, the mse is larger, default is p/3 ~ 2
+  mse.list = list()
+  for (i in 1:length(factor.list)){
+    rf.model = ranger(points ~ ., data = subset.train[,c(5,6,7,10,13)], 
+                      # min.node.size = nodesize, 
+                      mtry = factor.list[[i]][1],
+                      max.depth = factor.list[[i]][2]
+                      )
+    pred.test = predict(rf.model, subset.test)
+    pred.test.result = mean((pred.test$predictions -
+                               subset.test$points)^2)
+    mse.list[[i]] = c(rf.model$prediction.error, pred.test.result)
+  }
+  mse.list
+}
+b = Sys.time()
+mse.comp = rf.mse(subset.train, subset.test, factor.list)
+```
+  
+The final dataset from pre-processing part above is seperated into training set and testing set(80% and 20%). The random forest models with differetn paramter combinations are constructed on the training set. We can see the OOB prediction MSE from the random forest model is pretty close to the Testing set prediction MSE in Figure 3. This matches the OOB error generation mechanism and it apply to all different parameters' combination. Meanwhile, the prediction error/MSE decreases as the max depth increase because the bias will decrease as well. However, higher tree depth means more intensive computation. Also, as the max.depth increase, the prediction accuracy improvement will getting lower and lower, and finally we will see there is barely any improvement even though we dramatically increase the max.depth of the tree. This trend can be observed in Figure 3 too. We can see the MSE difference from all lines in max.depth = 4 is larger than the difference when max.depth is 8. Considering efficiency and performance, I choose max.depth = 6 in final random forest model. About the mtry, we can see plot with mtry = 1 has high MSE comparing to mtry = 2 and mtry = 3. With more candidate variable, it's more likely to fit a tree with high performance but it will also brings up the correlation between trees and the model variance. So we need to balance these effects and choose an optimal mtry to the final random forest model. From Figure 3, the plot with mtry = 2 and mtry = 3 are almost identical, both of two values seems to be reasonable choice. In fact, the default number of variables in most random forest model is **p/3** where **p** is the number of all predictors. In our dataset, p is equal to 4 and **p/3 ~ 2**. mtry = 2 will be the parameters applied to the random forest model. Other parameter will follow the default setting in the random forest (ranger) package. 
+
+
+```{r echo=FALSE, fig.height=8, fig.width = 11, out.width='0.7\\textwidth', out.height='0.4\\textwidth'}
+plot(c(4,6,8), 
+     c(mse.comp[[1]][1],mse.comp[[2]][1],mse.comp[[3]][1]), 
+     type = 'b', xlab = "max.depth", ylim = c(4.8, 6.2),
+     ylab = "MSE",main = "Figure 3. Random Forest MSE with Tuning Paramters", col = 'orange',
+     cex.lab = 1.5, cex.main = 2)
+lines(c(4,6,8), c(mse.comp[[1]][2],mse.comp[[2]][2],mse.comp[[3]][2]),
+      col = 'darkorange', type = 'b', pch = 2)
+lines(c(4,6,8), c(mse.comp[[4]][1],mse.comp[[5]][1],mse.comp[[6]][1]),
+      col = 'blue', type = 'b', pch = 3)
+lines(c(4,6,8), c(mse.comp[[4]][2],mse.comp[[5]][2],mse.comp[[6]][2]),
+      col = 'darkblue', type = 'b', pch = 4)
+lines(c(4,6,8), c(mse.comp[[7]][1],mse.comp[[8]][1],mse.comp[[9]][1]),
+      col = 'lightgreen', type = 'b', pch = 5)
+lines(c(4,6,8), c(mse.comp[[7]][2],mse.comp[[8]][2],mse.comp[[9]][2]),
+      col = 'green', type = 'b', pch = 6)
+
+
+legend('topright', 
+       c("OOB MSE, mtry = 1", 
+         "Test MSE, mtry = 1", 
+         "OOB MSE, mtry = 2",
+         "Test MSE, mtry= 2",
+         "OOB MSE, mtry = 3",
+         "Test MSE, mtry = 3"
+         ), 
+       pch = c(1:6),
+       col = c('orange','darkorange',
+              'blue','darkblue',
+              'lightgreen', 'green'),
+       lty = 1)
+```
+
+```{r echo=FALSE}
+rf.model.final = ranger(points ~ ., data = subset.train[,c(5,6,7,10,13)], 
+                  mtry = 2,
+                  max.depth = 6,
+                  importance = 'permutation'
+                  )
+pred.test.final = predict(rf.model.final, subset.test)
+pred.test.result = mean((pred.test.final$predictions -
+                               subset.test$points)^2)
+OOB.final = rf.model.final$prediction.error
+```
+  
+Table 3 is the final model parameters and its test prediction MSE and OOB MSE. In fact, the prediction performance can be futhur improved by select specific level in some columns or less levels in these columns. Increasing the tree depth can provide better performance as well. The goal to this project is to explore certain effective models to analyze our dataset. We will come back a bit later to compare this with next model. 
+
+
+  
+### Boosting
+
+&nbsp;&nbsp;&nbsp;&nbsp;Another powerful model that will work effectively with our mixed dataset is Boosting. In the process of model construction, many weak learners/trees will be generated sequentially to form an additive model. Each tree will learn the result according to the correctness of the prevous tree. Finally each tree will provide weighted vote to generate the final result for any input data points. Different from random forest or bagging method, boosting will use all the training data for each tree but the data points' importance can be different.  
+&nbsp;&nbsp;&nbsp;&nbsp;Generally we will tune three parameters in boosting method: **a)** the number of trees B, **b)** the shrinkage paramter $\lambda$ and **c)** the max.depth of each tree d. In order to compare the regression models in this project, I will set the similar max.depth parameters to each tree in boosting model. Together with the shrinkage parameter, I will present the model MSE according to different combinations of parameters in the following section. As for the number of tree, its effect is closely related to the shrinkage parameter so I didn't include it into our analysis. Other than these parameter, all factors will follow the default setting in the `gbm` package in R. 
+
+
+```{r echo=FALSE}
+firstrow = c('Package', 'mtry', 'max.depth', 'num.trees', 'Test MSE', 'OOB MSE')
+secondrow = c('ranger', '2', '6', '500', as.character(round(pred.test.result,2)), as.character(round(OOB.final,2)))
+display.3 = matrix(secondrow, ncol = 6)
+colnames(display.3) =  firstrow
+rownames(display.3) = c('Final RF Model')
+kable(display.3, format = "latex", align = 'c', 
+      caption = 'Final Random Forest Model')
+```
+
+Figure 4 display the MSE from gbm function crocess validation and testing set prediction. The training set and testing set I used here is same as their counterparts in Random Forest section. In random forest, we have OOB prediction error that's similar to cross validation error. Here in boosting, gbm function apply cross validation when it constructs the boosting models. So We can conveniently extract the CV MSE from the model. The CV MSE will be very close to the testing set prediction MSE.  From Figure 4, we can see the MSE do not always do down when the max.depth increase, the trend also depends on the shrinkage/learning rate, $\lambda$. For another, when the learning rate gets smaller, it's likely to generate lower MSE in certain max.depth. This makes sense because smaller learning rate can motivate the algorithm to look for the optimal point slowly but effectively. The algorithm probably will not skip the optimal value for the large step. As we further lower the $\lambda$ and choose appropriate max.depth, we may get even lower MSE but it will dramatically the numbers of trees before we achieve the optimal point. Considering balance between performance and efficiency, I choose max.depth = 6 and shrinkage = 0.6 for the final boosting model. Table 4 show the parameter setting to the final boosting model. 
+
+
+
+
+```{r echo=FALSE}
+set.seed(1)
+lambda = c(0.6, 0.8, 1)
+d = c(4, 6, 8)
+
+factor.l = list()
+c = 1
+for (i in lambda){
+  for (j in d){
+    factor.l[[c]] = c(i,j)
+    c = c + 1
+  }
+}
+boosting.mse = function(subset.train, subset.test, factor.list){
+  mse.list = list()
+  for (i in 1:length(factor.list)){
+    gbm.model = gbm(points~., data = subset.train[,c(5,6,7,10,13)],
+                    distribution = 'gaussian',
+                    n.trees = 200,
+                    shrinkage = factor.list[[i]][1],
+                    interaction.depth = factor.list[[i]][2],
+                    bag.fraction = 1,
+                    cv.folds = 10
+                    )
+    pred.boosting = predict(gbm.model, subset.test, n.trees = gbm.perf(gbm.model, plot.it = F))
+    pred.mse = mean((pred.boosting - subset.test$points)^2)
+    mse.list[[i]] = c(min(gbm.model$cv.error), pred.mse)
+  }
+  mse.list
+}
+
+boosting.mse.comp = boosting.mse(subset.train, subset.test, factor.l)
+
+```
+
+```{r echo=FALSE, fig.height=7, fig.width = 16, out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+par(mfrow=c(1,2))
+plot(c(4,6,8), 
+     c(boosting.mse.comp[[1]][1],boosting.mse.comp[[2]][1],boosting.mse.comp[[3]][1]), 
+     type = 'b', xlab = "max.depth", ylim = c(4.6, 4.9),
+     ylab = "MSE",main = "Figure 4. Boosting MSE with Tuning Paramters", col = 'orange',
+     cex.main = 1.5, lwd = 2, cex.pch = 2)
+lines(c(4,6,8), c(boosting.mse.comp[[1]][2],boosting.mse.comp[[2]][2],boosting.mse.comp[[3]][2]),
+      col = 'darkorange', type = 'b', pch = 2, lwd = 2, cex.pch = 2)
+lines(c(4,6,8), c(boosting.mse.comp[[4]][1],boosting.mse.comp[[5]][1],boosting.mse.comp[[6]][1]),
+      col = 'blue', type = 'b', pch = 3, lwd = 2, cex.pch = 2)
+lines(c(4,6,8), c(boosting.mse.comp[[4]][2],boosting.mse.comp[[5]][2],boosting.mse.comp[[6]][2]),
+      col = 'darkblue', type = 'b', pch = 4, lwd = 2, cex.pch = 2)
+lines(c(4,6,8), c(boosting.mse.comp[[7]][1],boosting.mse.comp[[8]][1],boosting.mse.comp[[9]][1]),
+      col = 'lightgreen', type = 'b', pch = 5, lwd = 2, cex.pch = 2)
+lines(c(4,6,8), c(boosting.mse.comp[[7]][2],boosting.mse.comp[[8]][2],boosting.mse.comp[[9]][2]),
+      col = 'green', type = 'b', pch = 6, lwd = 2, cex.pch = 2)
+
+
+legend('topright', 
+       c("CV MSE, lambda = 0.6", 
+         "Test MSE, lambda = 0.6", 
+         "CV MSE, lambda = 0.8",
+         "Test MSE, lambda = 0.8",
+         "CV MSE, lambda = 1",
+         "Test MSE, lambda = 1"
+         ), 
+       pch = c(1:6),
+       col = c('orange','darkorange',
+              'blue','darkblue',
+              'lightgreen', 'green'),
+       lty = 1)
+
+gbm.model.final = gbm(points~., data = subset.train[,c(5,6,7,10,13)],
+                    distribution = 'gaussian',
+                    n.trees = 200,
+                    shrinkage = 0.6,
+                    interaction.depth = 6,
+                    bag.fraction = 1,
+                    cv.folds = 10
+                    )
+pred.boosting = predict(gbm.model.final, subset.test, n.trees = gbm.perf(gbm.model.final, plot.it = F))
+pred.mse.boosting.final = mean((pred.boosting - subset.test$points)^2)
+cv.final = min(gbm.model.final$cv.error)
+
+k = gbm.perf(gbm.model.final)
+legend("topright",legend = c('Testing MSE','Training MSE'), 
+       lty = c(1,1),
+       col = c('green', 'black'))
+title(main="Figure 5. MSE to CV and Training Prediction", cex.main = 1.5, cex.lab = 1.5)
+```
+```{r echo=FALSE}
+
+
+
+firstrow = c('Package', 'shrinkage', 'interaction.depth\n(max.depth)', 'n.trees(num.trees)', 'Test MSE', 'CV MSE')
+secondrow = c('gbm', '0.6', '6', '200', as.character(round(pred.mse.boosting.final,2)), as.character(round(cv.final,2)))
+display.4 = matrix(secondrow, ncol = 6)
+colnames(display.4) =  firstrow
+rownames(display.4) = c('Final Boosting Model')
+kable(display.4, format = "latex", align = 'c', 
+      caption = 'Final Boostingt Model')
+```
+
+
+
+```{r echo=FALSE, fig.height=7, fig.width = 14, out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+boosting.importance = relative.influence(gbm.model.final, n.trees = gbm.perf(gbm.model.final, plot.it = F))
+b.i.matrix = rbind(names(boosting.importance), boosting.importance)
+rf.importance = importance(rf.model.final)
+r.i.matrix = rbind(names(rf.importance), rf.importance)
+
+par(mfrow=c(1,2))
+barplot(as.numeric(b.i.matrix[2,]), names.arg = b.i.matrix[1,], col = 'darkorange', main = 'Figure 6. Variable Importance in Boosting Model', cex.main = 1.5)
+
+barplot(as.numeric(r.i.matrix[2,]), names.arg = r.i.matrix[1,], col = 'darkorange', main = 'Figure 7. Variable Importance in RF Model', cex.main = 1.5)
+```
+
+In the final boosting model, we actually choose the tree from ``r gbm.perf(gbm.model.final, plot.it = F)`` iteration for testing prediction. Its value is x-coordinate of the vertical blue dash line in Figure 5. More over, we can see the training MSE will continously decrese as iteration increase but the CV error will reach a minimal value and increase again after the minimal value. With the same depth in each tree, Boosting model perform better than Random Forest model on the MSE according to Table 3 and Table 4. Now let's check their variable importance comparison in Figure 6 and Figure 7. The variable importance calculation are different in two models however we can still indentify the **price** is apparently more important than any other variables in both models. 
+
+### Comparison to Lasso Model  
+
+```{r echo=FALSE}
+set.seed(1)
+wine.mat = model.matrix( ~ . -1, data = wine.subset[c(5,6,7,10,13)])
+# Remove country
+
+wine.mat.train = wine.mat[train,]
+wine.mat.test = wine.mat[-train,]
+
+## -1 suppress the intercept
+wine.y.train = wine.mat.train[,1]
+wine.x.train = wine.mat.train[,-1]
+wine.y.test = wine.mat.test[,1]
+wine.x.test = wine.mat.test[,-1]
+
+lasso.fit = cv.glmnet(wine.x.train, wine.y.train, alpha = 1)
+ridge.pred = predict(lasso.fit, wine.x.test, s = "lambda.min")
+lasso.test.mse = mean((wine.y.test - as.vector(ridge.pred))^2)
+```
+&nbsp;&nbsp;&nbsp;&nbsp;Lasso Regression can also work with mixed variable dataset but we need to transform the dataset into one-hot matrix first. Figure 8 is the plot for MSE vs. logarithmic $\lambda$ (A tuning paramter to omit/minimize predictors in our final effective model). The lasso regression testing MSE is ``r lasso.test.mse`` with minimal $\lambda$ in the function. You can also find this value on the intersection between the left grey dashed line and the red dot line. One of the advanced feature to lasso regression is it can subset the coefficients to a get a simple model. However, with the same training set here, the lasso MSE is apparently higher than the MSE of Random Forest and Boosting model. 
+
+```{r echo=FALSE, fig.height=4, fig.width = 6, out.width='0.65\\textwidth', out.height='0.4\\textwidth'}
+par(mar = c(5, 6, 4, 4) + 0.2)
+plot(lasso.fit)
+title(main = 'Figrue 8. MSE vs. log(lambda) in Lasso Regression', line = 2.5, cex.main = 0.8)
+```
+
+## **V. Winerires Recommending** 
+
+```{r echo=FALSE}
+# Check
+fruity.index = grep("fruity", wine$description, ignore.case = T)
+#9204 fruity  378 Fruity
+fruity.wine = wine[fruity.index,]
+fruity.Pinot.Noir = fruity.wine[fruity.wine$variety == "Pinot Noir",]
+# average for all Pinot Noir
+fruity.Pinot.Noir = fruity.Pinot.Noir[fruity.Pinot.Noir$price<20 & fruity.Pinot.Noir$price != 0,]
+
+p.mean = mean(fruity.Pinot.Noir$points)
+w = aggregate(. ~ winery, fruity.Pinot.Noir[c(5,14)], mean)
+w.id = with(w, order(w$points, decreasing = T))
+winery.mean = w[w.id,]
+winery.freq = data.frame(table(fruity.Pinot.Noir$winery))
+colnames(winery.freq) = c("winery", "Freq")
+winery.com = merge(winery.mean,
+ winery.freq)[with(merge(winery.mean,winery.freq),
+ order(merge(winery.mean,winery.freq)$points, decreasing = T)),]
+b.winery = winery.com[winery.com$Freq > 1,]$winery
+
+winery.Pinot.Noir = wine[wine$variety == 'Pinot Noir',]
+winery.all.PN = aggregate(. ~ winery, winery.Pinot.Noir[c(5,14)], mean)
+colnames(winery.all.PN) = c('winery', 'points.all')
+
+winery.all.PN.freq = data.frame(table(winery.Pinot.Noir$winery))
+colnames(winery.all.PN.freq) = c('winery','Freq.all')
+
+winery.total = merge(winery.com, winery.all.PN)
+winery.total = merge(winery.total, winery.all.PN.freq)
+winery.total = winery.total[with(winery.total, order(winery.total$points, decreasing = T)),]
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;If you are looking for a pinot noir with reasonable price, this review dataset should be the great start since pinot noir is the most popular wine in all its reviews (There are ``r sum(wine$variety == 'pinot noir' | wine$variety == 'Pinot Noir')`` review about Pinot Noir). Of course, we don't want to read a catalog with the thousand of reviews to make the decision. Let's transform our data to meet your requirement. 
+
+
+```{r echo=FALSE, fig.height=7, fig.width = 16, out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+par(mfrow=c(1,2))
+par(mar = c(7,5,2,5))
+winery.bar = barplot(
+  winery.com[winery.com$points>p.mean,]$points[1:20],                   
+  main = "Figure 9. Winery Comparison on Fruity Pinot Noir",
+  col = ifelse(winery.com$winery %in% b.winery, 'red', 'deepskyblue'),
+  ylim = c(84,96), 
+  xpd = F,
+  cex.main = 1.5
+  )
+text(winery.bar, par("usr")[3], 
+     labels = winery.com[winery.com$points>p.mean,]$winery[1:20], 
+     srt = 45, adj = c(1.1,1.1), 
+     xpd = TRUE, 
+     cex = 1)
+box()
+
+par(mar = c(7,5,2,5))
+
+colour = rep(c('deepskyblue', 'darkorange'), dim(winery.total)[1])
+colour[which(winery.total$winery %in% b.winery) * 2 - 1] = 'red'
+
+
+
+winery.bar.1 = barplot(
+  rbind(winery.total[winery.total$points>p.mean,]$points[1:20], 
+  winery.total[winery.total$points>p.mean,]$points.all[1:20]                           ), 
+  main = "Figure 10. Winery Comparison on Pinot Noir (Detailed)",
+  beside = TRUE,
+  col = colour[1:40],
+  ylim = c(84,105), 
+  xpd = F,
+  cex.main = 1.5)
+box()
+
+z = winery.total[winery.total$points>p.mean,]$Freq.all[1:20]/6 + 91
+
+lines((c(1:20)-0.3) * 3, z, type = 'b', pch = 16, col = 'red')
+
+text((c(1:20)-0.3) * 3, z + 0.4, 
+     labels = winery.total[winery.total$points>p.mean,]$Freq.all[1:20],
+     cex = 1.2)
+
+text(winery.bar.1, par("usr")[3], 
+     labels = as.vector(rbind(winery.total[winery.total$points>p.mean,]$winery[1:20],rep("",20))), 
+     srt = 45, adj = c(1.1,1.1), 
+     xpd = TRUE, 
+     cex = 1)
+abline(h = p.mean, lwd = 1.5, lty = 2)
+abline(h = mean(wine[wine$variety == 'Pinot Noir',]$points), lwd = 1.5, col = 'purple', lty = 2)
+legend("top", 
+       legend = c("Investigated Set", "Overall", "Pinot Noir Qty "), 
+       xjust = 1,
+       yjust = 0,
+       x.intersp = 0.8,
+       y.intersp = 0.85,
+       inset = c(-0.2, 0.15),
+       fill = c('deepskyblue','darkorange', NA), 
+       pch = c(NA,NA,19),
+       col = c(NA,NA,'red'),
+       border = 0,
+       bty = "n"
+       )
+```
+
+I subset this review dataset so only the review with less than 20-dollar price and fruity comment will be considered in the folloiwng section and investigated set. Figure 9 shows the top 20 wineries with highest average points in our subset. Since the mean score to all the Pinot Noir is ``r p.mean``, it seems like it can't be wrong to pick five wineries from these top Pinot Noir wineries, doesn't it? Let's go a bit deeper into our subsetting data. I found most of the wineries only have one review about their Pinot Noir which means we can't be confident to our estimate based on such a small dataset. Of course, we do have some wineries with more than one Pinot Noir and these Pinot Noir are all with great score. e.g. Murphy-Goode, Willm, Acrobat, their bars are highlighted in Figure 9 and Figure 10 with red color. They may be good candidates to us. Generally we need more information to their overall Pinot Noir quantity score. Except for the Pinot Noir information in our sebsetting dataset, I also added the Pinot Noir score and Quantity to all the wineries based on the orginal dataset. We can see the detail from Figure 10. The blue and red bars are from our subsetting dataset wineries with top 20 scores. The orange bars are the overall Pinot Noir score to these wineries. The red curve on top display the Pinot Noir quantity produced by these wineries. The black dashed line and purple dashed line is added as reference. They are the average scores to our subsetting dataset and all Pinot Noir records. Below are two criteria that may be helpful to your decision.
+
+1) Winery experience on Pinot Noir. According to the overall Pinot Noir product to all these wineries, the top five wineries are `Balletto`, `J. Lohr`, `Simonnet-Febvre`, `Calera`, and `A to Z` or `Acrobat`.  
+
+2) Winery scores based on subsetting dataset and overall Pinot Noir products review. The top five wineries are `Balletto`, `Dr. Nägler`, `Esterházy`, `Wakefield`, `Calera`. I didn't recommand `Three Brothers` and `Villa Wolf` just because their Pinot Noir sample is small. If you like Anna Lee C. Iijima's recommandation, you can definitely try them.
+
+You may have noticed the we have overlap in these two criteria. `Balletto` and `Calera` show up in both my criteria. `Balletto`'s score are perfect based on our customer's requirement, so as it's overall Pinot Noir score. `Calera` are not that good in customer's requirement but their overall score is unbeatable. If we are very confident to our taster's judgement, these two wineries should be the ideal choice to you. The only thing we may want to pay attention is both wineries' product are mostly judged by specific tasters, Virginie Boone and Matt Kettmann. They happened to be the tasters who graded the wine with highest average score (Table 5). There may be some relationship between taster's grading style and wine's score. 
+
+```{r echo=FALSE}
+taster.mean = aggregate(. ~ taster_name, winery.Pinot.Noir[c(5,10)], mean)
+taster.mean = taster.mean[order(taster.mean$points, decreasing = T),]
+display.5 = cbind(taster.mean[1:6,], taster.mean[7:12,], taster.mean[13:18,])
+rownames(display.5) = LETTERS[1:6] 
+kable(display.5, caption = "Taster's Average Score in all reviews")
+```
+  
+Before we close this section, I would like to recommand `Bridgeview` to you if you would like to look for buried treasure. All their Pinot Noir are graded by strict taster. This is why their overall score is not remarkable. However, the top score of their Pinot Noir is from the most strict taster Michael Schachner who is strict to all kinds of wine! If there is no serious mistake, Bridgeview's top scored Pinot Noir, the one in our subsetting dataset, definitely worth a try.
+
+## **VI. Conclusion** 
+
+&nbsp;&nbsp;&nbsp;&nbsp;In this project, we investigate the wine review dataset from Wine Enthusiast on the wine score and the relationship between score and other variables in the dataset. By constructing two ensemble models, I estimate the performance of these regression model. Simultaneously, the parameter tuning procedure is presented in IV part to both regression models. Generally their MSE performance are much better than ridge regression, which is from standard linear regression. Between the two models, boosting did slightly better than random forest. I also compare the variable importance from these models. The price viable play relatively important role in the models while predicting the points. As data scientist to this project, I also provide the most reasonable criteria for choosing the best Pinot Noir wineries with my familiarity to the dataset. Based on my discoveries, I strongly recommand the oustanding wine and its winery to our customer according what the data tell. Let's keep going.    

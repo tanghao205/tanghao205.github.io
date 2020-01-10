@@ -1,0 +1,1001 @@
+---
+title: 'Skin Cancer Diagnostics'
+date: ' '
+author: "Hao Tang"
+geometry: margin = 0.55in
+documentclass: article
+indent: true 
+classoption: oneside
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+
+    
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(include = TRUE)  # TRUE for solution; FALSE for questions set
+
+  knitr::opts_chunk$set(echo = TRUE)
+  knitr::opts_chunk$set(message = FALSE)
+  knitr::opts_chunk$set(warning = FALSE)
+  knitr::opts_chunk$set(fig.height = 6, fig.width = 8, out.width = '50%', fig.align = "center")
+  options(width = 90)
+```
+
+```{css, echo=FALSE}
+.solution {
+background-color: #e6ffe6;
+}
+```
+
+```{r echo=FALSE}
+rm(list = ls(all = TRUE))
+
+list.of.packages <- c("knitr", "tidyverse", "ggpubr", "ggplot2",  "ranger", "Rtsne", "gbm", "readr", "imager", "class" , "caret", "kableExtra", "pROC", "e1071", "rpart", "rpart.plot", "glmnet")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)){
+  install.packages(new.packages, repos = "http://cran.us.r-project.org")
+  }
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(readr)
+library(Rtsne)
+library(ranger)
+library(gbm)
+library(imager)
+library(e1071)
+library(class)
+library(caret)
+library(dplyr)
+library(kableExtra)
+
+
+
+```
+
+## **I Project Description and Summary**
+
+&nbsp;&nbsp;&nbsp;&nbsp;Skin cancer, as the abnormal growth of skin cell is one of the most common cancer in the united states^[Mayo Clinic.Skin cancer. https://www.mayoclinic.org/diseases-conditions/skin-cancer/symptoms-causes/syc-20377605] ^[American Cancer Society. Skin Cancer. https://www.cancer.org/cancer/skin-cancer.html] ^[American Academy of Dermatology. Skin Cancer. https://www.aad.org/media/stats-skin-cancer]. There are three major types of skin cancer: basal cell carcinoma, melanoma and squamous cell carcinoma. The curing effect to them is based on whether there's detection in the early stage. Regular skin self-exams is very important to detect the signs of skin cancer and it's recommanded by American Academy of Dermatology. However, it is challenging to discover the sign of skin cencer in the early stage without attention and specific training ^[June K. Robinson. et. al.  Skills Training to Learn Discrimination of ABCDE
+Criteria by Those at Risk of Developing Melanoma. Arch Dermatol Vol 142, Apr 2006]. This project is to explore the detection methods according to skin cancer lesion area with different machine learning models. The project has two sections. The first part is to fit the classification on the skin cancer image pixel numeric value, and analyze the prediction result in different models. The second part is to extract visible features from the images after effective image processing. These features are closely related to comman skin cancer examination methods. The fitting classifiers based on our new features will be more applicable and interpretable to skin cancer diagnosis. 
+
+
+
+```{r echo=FALSE}
+# File name
+filenames.benign = list.files("H:/UIUC MCS-DS/1_Pratical Statistical Learning/Project/Group/542/benign", pattern="*.jpg", full.names=T)
+filenames.malignant = list.files("H:/UIUC MCS-DS/1_Pratical Statistical Learning/Project/Group/542/malignant", pattern="*.jpg", full.names=T)
+
+list.all.g1 = list()
+for (i in 1:150){
+  temp.b = load.image(filenames.benign[[i]]) %>% resize(120,90)
+  # list.all.g1[[i]] = as.cimg(temp.b[,,,2]/(temp.b[,,,1] + temp.b[,,,2] + temp.b[,,,3] + 1e-8)) %>% resize(100,75)
+  list.all.g1[[i]] = temp.b
+  temp.m = load.image(filenames.malignant[[i]]) %>% resize(120,90)
+  # list.all.g1[[i + 150]] =  as.cimg(temp.m[,,,2]/(temp.m[,,,1] + temp.m[,,,2] + temp.m[,,,3] + 1e-8)) %>% resize(100,75)
+  list.all.g1[[i + 150]] = temp.m
+}
+
+```
+
+```{r echo=FALSE, , fig.height=6, fig.width = 16,out.width='0.95\\textwidth', out.height='0.4\\textwidth'}
+
+#fig.show='hold',fig.align='center', fig.cap="\\label{fig:figs}Lesion Image Sample"
+
+## Please change the prefix or parent folder to the image path if you knit the file. 
+
+# include_graphics(c("H://UIUC MCS-DS//1_Pratical Statistical Learning//Project//Group//542//benign//ISIC_0000000.jpg",
+#                    "H://UIUC MCS-DS//1_Pratical Statistical Learning//Project//Group//542//benign//ISIC_0000110.jpg",
+#                    "H://UIUC MCS-DS//1_Pratical Statistical Learning//Project//Group//542//malignant//ISIC_0009898.jpg",
+#                    "H://UIUC MCS-DS//1_Pratical Statistical Learning//Project//Group//542//malignant//ISIC_0011269.jpg"
+#                    ))
+
+library(imager)
+par(mfrow=c(2,4))
+par(mar = c(4, 4.5, 7.5, 4) - 4)
+plot(list.all.g1[[1]],axes=FALSE)
+plot(list.all.g1[[16]],axes=FALSE)
+plot(list.all.g1[[32]],axes=FALSE)
+plot(list.all.g1[[149]],axes=FALSE)
+plot(list.all.g1[[156]],axes=FALSE)
+plot(list.all.g1[[170]],axes=FALSE)
+plot(list.all.g1[[221]],axes=FALSE)
+plot(list.all.g1[[300]],axes=FALSE)
+mtext("Figure 1: Lesion Image Sample", side = 3, line = -2, outer = TRUE, cex = 1.8)
+```
+
+
+## **II Data Processing**
+
+&nbsp;&nbsp;&nbsp;&nbsp;In the dataset of this project, we have 300 dermascopy images for different types of skin cancers leision. Half of the images are labelled as confirmed benign and the other half is labelled as confirmed malignant. We can take a look at the image samples in Figure 1. Some of the images are very misleading especial to the people without specific training. The top row is benigh samples and the bottom row is malignant samples. With no indentification/feature to specific type of skin cancer, it seems chanlleging to tell why they are lebelled as it. In following sections, this project will try to analyze the samples with classification model (0 is the label to benign and 1 is label to malignant for all models) by the pixel value and some interesting features.
+
+
+Classification to the raw images is very challenging task. Our sample images are captured in different magnification, exposure and distance. Some of them are captured with high-resolution dermoscope whereas others are from normal dermoscope. It seems that we are supposed to have customized image processing according to different image conditions. And this will lead to a very inefficient procedure. Considering the balance of efficiency and classification performance, I decided to resize all the images to the same pixel size and keep original color channels, shadow and contrast to the images. That is, there is only resolution change to the images in pixel-based model pre-processing. Most of the challeging job in classification will be left to our models. The major reason to resizing is becasue some of the large images (about 17Mbs) will dramatically decrease our model's efficiency. Processed images will be with 120 X 90 pixels which is proportional compressed version to the most comman resolution (600 x 450) in the images dataset.  
+
+Now, each processed image has 32400 (120W X 90H X 3C) elements, which means 32400 variables/predictors in classification fitting, still pretty large to the following model processing. Quite a lot of pixels are baraly informative, e.g. the pixel close to the image's corner and edge. On ther other hand, the pixels in the center of the lesion area are crucial since they may represent importance features. In order to focus on the most important feature, I use PCA to transform predictors from orginal pixel space to PCA space. After PCA transforming, we will have 300 X 300 matrix for 300 samples and 300 principle components as the new predictors. Please notice when $n<<p$, we need to pay attention to the importance of the variable after transform, otherwise the result won't be stable^[Jeongyoun Ahn. et al. The high-dimension, low-sample-size geometric representation
+holds under mild conditions. Biometrika (2007), 94, 3, pp. 760–766]. Table 1 shows the importance to the first 5 and last 5 principal components. We can see percentage to the last 5 principal has decreased dramatically thus our PCA transformation should be stable and reasonable. Even though we can further decrease the predictor number according to the importance value, all the 300 predictors will be kept in the model fitting section so the fitting model will be constructed on top of all the principle components. Our classifiers should be able to handle the whole information we got after data-processing.
+
+
+
+
+
+```{r  echo=FALSE}
+# b = Sys.time()
+
+
+
+mat.bm = matrix(unlist(list.all.g1), ncol = 120 * 90 * 3, byrow = T)
+rownames(mat.bm) = 1:300
+y = rep(c(0,1), each = 150)
+names(y) = 1: 300
+# Sys.time() - b
+# almost 2min
+
+pca.t = prcomp(mat.bm, center = T)
+mat.pca = pca.t$x[,1:300]
+rownames(mat.pca) = 1:300
+```
+
+
+
+```{r echo=FALSE}
+detach("package:imager", unload = TRUE)
+display1 = t(as.matrix((summary(pca.t)$importance)[2,c(1:5, 296:300)]))
+rownames(display1) = 'Percentage'
+kable(display1, caption = 'Importance Percentage of PCA')
+```
+  
+Another popular image processing method is to keep the green channel value and resize the picture to a relatively lower resolution^[J.L.Reimers. et al. Green Channel vs. Color Retinal Images for Grading Diabetic Retinopathy in DCCT/EDIC.Investigative Ophthalmology & Visual Science April 2010, Vol.51, 2285.]. I didn't apply this method in the report but the general model performance with this processing is slightly worse than the method applied here and next section. 
+
+In the feature engineering section, I will apply more advanced procedure to the dataset based on the diagnosis criteria and this isn't the focus to pixel value classification section^[Andre Esteva. et. al.  Dermatologist-level classification of skin cancer with deep neural networks. Nature Vol 542 February 2, 2017.]. 
+
+
+## **III Classification Models Based on Pixels**
+
+### K-Nearest Neighbors
+
+```{r echo=FALSE, fig.height=8, fig.width = 18, out.width='0.95\\textwidth', out.height='0.5\\textwidth'}
+library(class)
+
+set.seed(10)
+f = 3
+knn.folds = createFolds(1:300, k = f)
+
+mat.pca.knn = pca.t$x[,1:300] ## Make sure the rows are matching original matrix
+rownames(mat.pca.knn) = 1:300
+
+y.pca.knn = rep(c(0,1), each = 150)
+names(y.pca.knn) = 1:300
+
+pca.knn.accu = c()
+pca.knn.accu.train = c()
+accu.k = c()
+accu.k.train = c()
+for (i in seq(1,23,2)){
+  accu.k = c()
+  accu.k.train = c()
+  for (j in 1:f){
+    m.train.pca.knn = mat.pca.knn[-knn.folds[[j]],]
+    m.test.pca.knn = mat.pca.knn[knn.folds[[j]],]
+    y.pca.knn.train = y.pca.knn[-knn.folds[[j]]]
+    y.pca.knn.test = y.pca.knn[knn.folds[[j]]]
+    knn.class = knn(train = m.train.pca.knn, test = m.test.pca.knn, 
+                    cl = y.pca.knn.train, k = i)
+    knn.class.train = knn(train = m.train.pca.knn, 
+                    test = m.train.pca.knn, cl = y.pca.knn.train, k = i)
+    accu.k = append(accu.k, mean(y.pca.knn.test == knn.class))
+    accu.k.train = append(accu.k.train, 
+                          mean(y.pca.knn.train == knn.class.train))
+    
+  }
+  # print(mean(accu.k.train))
+  pca.knn.accu = append(pca.knn.accu, mean(accu.k))
+  pca.knn.accu.train = append(pca.knn.accu.train, mean(accu.k.train))
+}
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;A model may be the most important part of machine learning. We build a model with training data and use the model to describe the data status and predict the output for future input data. After data processing, we are ready to model construction.  
+
+First, let's try the most straightforward model, k-nearest neighbors (KNN) classifier. This classificatin model search for the k training observations that's closest to the test observation then apply major vote based on the labels of these k observations. The resulting label from the vote will be the label to the test observation. The closest distance usually is based on Euclidean distance. KNN made very mild assumption in its structure so it can start to work with or without model constuction/training! Because of its simple algorithm, KNN is very popular and efficient to implement. In this section, I test the training accuracy and testing accuracy on different degree of freedom (N/k, given N is the total number of training observations) by 3-fold cross validation so our result will be more stable.   
+
+Figure 2 shows trend of training accuracy and testing accuracy as degree of freedom increase. The plots are jagged due to our small training and test set size(3-folds cross validation on 300 images) and the image classification difficulty. However, we can still see the testing accuracy increases at first as degree of freedom increases, then it decreases after some optimal values. As for the training accuracy, the trend is going up as degree of freedom increases. Our observation makes sense according to the bias-variance tradeoff. A large k means stable fit and high bias and low variance, and the overall accuracy is relatively low, which is shown on the left of Figure 2a. In contrast, a small k means flexible fit, as well as low bias and high variance, thus the overall accuracy is all low. There exists a gap between large k (Or small degree of freedom) and small k (Or large degree of freedom) where we can observe the optimal test accuracy. The best accuracy to the KNN model is `r max(pca.knn.accu)` when `k = `r which.max((pca.knn.accu))``.   
+
+KNN is actually based on the Euclidean distance between the datapoints. We can take a look at the data distribution with t-SNE (t-distributed stochasitc neighbor embedding) on the original pixel matrix ^[Laurens Van der Maaten et. al. Visualizing Data using t-SNE. Journal of Machine Learning Research. 9 (2008) 2579-2605]. Figure 3 shows that we are fitting models on a challenging dataset apprently. 
+
+
+
+
+```{r echo=FALSE, fig.height=7, fig.width = 21, out.width='1.05\\textwidth', out.height='0.55\\textwidth'}
+
+par(mfrow=c(1,3))
+plot(x = 200/seq(1,23,2), y = pca.knn.accu, pch = 16, 
+     ylab = '', xlab = '', col = 'orange', cex = 2)
+title(main = "Figure 2a: CV Test Accuracy vs. Degree of Freedom", cex.main = 2)
+title(xlab= "Degree of Freedom (N/k)", line = 3, cex.lab=1.8)
+title(ylab="CV Accuracy", line=2.5, cex.lab=1.8)
+
+plot(x = 200/seq(1,23,2), y = pca.knn.accu.train, pch = 16, 
+     ylab = '', xlab = '', col = 'blue', cex = 2)
+title(main = "Figure 2b: CV Train Accuracy vs. Degree of Freedom", cex.main = 2)
+title(xlab= "Degree of Freedom (N/k)", line = 3, cex.lab=1.8)
+title(ylab="CV Accuracy", line=2.5, cex.lab=1.8)
+
+library(Rtsne)
+tsne = Rtsne(mat.bm)
+plot(tsne$Y, pch = 16, main = 'Figure 3: t-SNE Distribution of Pixel Distribution', col=rep(c(1,2),each = 150), cex.lab = 1.5, cex.main = 2, xlab = 'Dimension 1', ylab = 'Dimension 2', cex = 1, cex.lab=1.8)
+## There is a valley there
+```
+
+```{r echo=FALSE}
+display2 = matrix(c(max(pca.knn.accu), (which.max(pca.knn.accu) * 2 - 1)), ncol = 2)
+rownames(display2) = 'KNN Classifier'
+colnames(display2) = c('Test Accuracy', 'K')
+kable(display2, caption = 'Final KNN Model')
+
+
+```
+
+
+### Support Vector Machine
+
+&nbsp;&nbsp;&nbsp;&nbsp;Since our images are with binary labels, support vector machine (SVM) classifier seems to be good fit. SVM emphasize on construct separating line or hyperplane between classes. The binary classes may be difficult to seperated in low dimensional space but it can always be separated in high dimention. SVM can deal with this type of classfication by projecting the observations' similarity to space with huge or infinite dimension. The projection is implemented by the kernel function. A kernel is mapping that projects the low dimensional space data's relationship to high dimentional space. Without knowing the direct projection of the observation itself, the kernel help us deal with the similarity in high dimensional space and separate the observations. 
+
+Similar to KNN classifier, cross validation shall be applied to estimate accuracy. Incredibly, package `e1071` comes with a `tune()` function which by default performs ten-fold cross-validation on the input dataset with tuning parameters input. That being said, by inputing combinations of tuning parameters (or a parameters' grid), I can achieve the corresponding CV error to corresponding models. So instead of separating train set and test set, I use the whole dataset in tune function to estimate the optimal model and let the tune() function to take care of the cross validation.  
+
+As for the kernel option, we can choose polynomial kernal, linear kernel or radial kernel. Since I don't know data distribution in the pixel space, I use radial kernel in case the data distribution comes with curvy boundary. For radial kernel function, we will tune two parameters to search optimal model: the cost C and $\gamma$. 
+
+
+```{r echo=FALSE}
+library(e1071)
+
+# pca.knn = prcomp(mat.bm, center = T)
+# train = sample(300,200)
+
+
+set.seed(10)
+folds = createFolds(1:300, k = 3)
+
+mat.pca.svm = pca.t$x[,1:300]
+rownames(mat.pca.svm) = 1:300
+y.svm = rep(c(0,1), each = 150)
+names(y.svm) = 1:300
+# 
+# svm.cv = sapply(folds, function(x) {
+# m.train.svm = mat.pca.knn[-x,]
+# y.train.svm = y.svm[-x]
+# m.test.svm = mat.pca.knn[x,]
+# y.test.svm = y.svm[x]
+# 
+# svm.fit = svm(x = m.train.svm, y = y.train.svm, kernel = 'radial', gamma = 0.000087, cost = 100, scale = F, type = 'C-classification')
+# 
+# svm.pred = predict(svm.fit, m.test.svm)
+# return(mean(svm.pred == y.test.svm))
+# })
+
+tune.out=tune(svm , y∼., data = data.frame(y = y.svm, mat.pca.svm), kernel ="radial",  
+ranges =list(gamma = c(0.004,0.005,0.006),
+cost=c(1, 1.2, 1.4)))
+
+display3 = as.matrix(summary(tune.out)$performance)
+display3[,3] =  1 - display3[,3]
+display3 = display3[,1:3]
+colnames(display3) = c('gamma', 'cost', 'accuracy')
+# For radial, gamma = 0.005, cost = 1.1 reach ~%75
+# svm.accu = mean(svm.cv)
+display3 = matrix(display3, ncol = 9, nrow = 3, byrow = T)
+rownames(display3) = c('gamma', 'cost', 'accuracy')
+colnames(display3) = c('point1', 'point2', 'point3', 'point4', 'point5',
+                       'point6', 'point7', 'point8', 'point9')
+
+
+tune.out.radial=tune(svm , y∼., data = data.frame(y = y.svm, mat.pca.svm), kernel ="radial",  
+ranges =list(gamma = c(0.005),
+cost=c(1.2)))
+tune.out.linear=tune(svm , y∼., data = data.frame(y = y.svm, mat.pca.svm), kernel ="linear",  
+ranges =list(cost=c(1.2)))
+
+set.seed(10)
+train = sample(300,200)
+m.train.svm = mat.pca.svm[train,]
+y.train.svm = y.svm[train]
+m.test.svm = mat.pca.svm[-train,]
+y.test.svm = y.svm[-train]
+svm.fit.radial = svm(y.train.svm~., data = data.frame(y.train.svm, m.train.svm), kernel = 'radial', gamma = 0.005, cost = 1.2, scale = F, type = 'C-classification', probability = T)
+# plot(svm.fit, data.frame(y.train.svm, m.train.svm), PC1~PC2)
+# title(main="Figure 3", adj=0.18, line=1, font=2)
+
+svm.fit.linear = svm(y.train.svm~., data = data.frame(y.train.svm, m.train.svm), kernel = 'linear', cost = 1.2, scale = F, type = 'C-classification', probability = T)
+
+
+
+pred.svm.linear = predict(svm.fit.linear, m.test.svm, probability = T)
+pred.svm.radial = predict(svm.fit.radial, m.test.svm, probability = T)
+
+```
+
+Table 3 presents the comparison between different combinations of cost and $\gamma$. According to the accuracy, we have the best setting : gamma= `r tune.out$best.model$gamma`, cost = 1.2 (Table 4). It seems like the best model is with small cost and very small $\gamma$. Large value of cost will eliminate positive slack parameter $\xi$ and make the boundary wiggly. A small cost means the model can perform well with normal tolerance to misclassified data around the dicision boundary. That is, the boundary shall be smooth. A small $\gamma$ means the decision boundary doesn't needs to be curvy as well, which means a linear boundary may also work well.  
+
+In order to compare the radial kernel and linear kernel performance in our dataset, I separated the dataset into 200-sample train set and 100-sample test set and fit the models with two kernels accordingly. For the radial kernel model, I used the parameters achieved from the radial kernel cross-validation.  For the linear kernel model, I used the same cost value (1.2) and kept default values to other parameters (We don't have tune $\gamma$ in linear kernel model). Figure 3 shows the ROC curve to the radial kernel classifier and linear kernel classifier. Their curves have pretty close shape. According to their AUC (area under the curve), these models have similar classification ability in different thresholds. 
+
+
+```{r echo=FALSE}
+kable(display3, caption = 'Accuracy Comparison on 10-fold Cross Validation')
+```
+```{r echo=FALSE}
+display4 = matrix(c('radial', '1.2', '0.005', as.character(round(display3[3,5],7))), ncol = 4)
+colnames(display4) = c('Kernel','cost','gamma', 'CV Accuracy')
+kable(display4, caption = 'Final SVM model')
+```  
+ 
+
+```{r echo=FALSE, fig.height=6, fig.width = 6, out.width='0.8\\textwidth', out.height='0.5\\textwidth'}
+# ROC
+library(pROC)
+
+par(pty = 's')
+# Must make a radial kernel model first, put probability = T inside the svm() and predict()
+R.roc = roc(y.test.svm, 1 - attr(pred.svm.radial, "probabilities")[,2],  legacy.axes = T, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", quiet = T, plot = T, main = 'Figure 4: ROC to SVM model', col = 'darkorange', lwd = 3, auc = T, cex.lab = 0.8, cex.main = 1.1
+)
+L.roc = roc(y.test.svm, 1 - attr(pred.svm.linear, "probabilities")[,2],  legacy.axes = T, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", quiet = T, plot = T, main = 'Figure 3: ROC to SVM model', col = 'deepskyblue', lwd = 3, auc = T, cex.lab = 0.8, cex.main = 1.1, add = T
+)
+# plot(cc, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", xaxt = 'n')
+# axis(1, at=1:4, labels=c('0.0','0.2', '0
+#                          4', '0.6'))
+# Can also put xlab = 'False Positive Percentage', ylab = "True Positive Percentage", set the color and lwd or print.auc = TRUE
+## All there is inside the roc()
+text(0.4, 0.4, paste('Radial AUC =',as.character(R.roc$auc)))
+text(0.4, 0.35, paste('Linear AUC =',as.character(L.roc$auc)))
+legend('bottomright', c('Radial Kernel SVM', 'Linear Kernel SVM'), lty = 1, col = c('darkorange', 'deepskyblue'), lwd = 2)
+par(pty = 'm')
+```
+
+
+
+
+
+### Random Forest
+
+&nbsp;&nbsp;&nbsp;&nbsp;We can try a very different model in this part. Let's investigate the performance on randomforest based on new observations from PCA transformation. As for the high dimension of the orginal dataset (120W X 90H X 3C), random forest algorithm fitting and prediction are very expensive and they probably cannot fit in most computer's memory. After PCA, our data has been transferred to a 300-dimensional data so the random forest model is accessible. 
+
+
+
+
+  
+```{r echo=FALSE}
+library(ranger)
+set.seed(1)
+train = sample(300,200)
+m.train.rf = mat.pca[train,]
+m.test.rf = mat.pca[-train,]
+y.rf = rep(c(0,1), each = 150)
+names(y.rf) = 1:300
+y.rf.train = y.rf[train]
+y.rf.test = y.rf[-train]
+df.train.rf = data.frame(y = y.rf.train, m.train.rf)
+df.test.rf = data.frame(y = y.rf.test, m.test.rf)
+df.all = data.frame(y = y.rf,mat.pca.knn)
+
+set.seed(1)
+test.accu.500 = c()
+oob.accu.500 = c()
+mtry = c(14,16,18)
+max.depth = c(3,4,5)
+#sqrt(p) for classification
+for (i in mtry){
+  for (j in max.depth){
+    rf.model = ranger(y ~ ., data = df.train.rf, num.trees = 500,
+                     mtry = i, # 15
+                     max.depth = j, # 5
+                     classification = T,
+                     importance = 'permutation'
+                     )
+    pred.rf = predict(rf.model, df.test.rf)
+    # 1 - rf.model$prediction.error
+    test.accu.500 = append(test.accu.500 , 
+                           mean(pred.rf$predictions == y.rf.test))
+    oob.accu.500 = append(oob.accu.500, (1-rf.model$prediction.error))
+  }
+}
+
+
+```
+
+Random Forest is ensemble model constructed on top of multiple dicision trees. It applies bagging or bootstrap aggregating idea and construct the decision trees (forest) from bagging. When we make prediction on a datapoint/observation, the regression result will be generated by the trees' result averaging and the classification result will be generated by the trees' major vote. The most important advantage of random forest is correlation reduction in the model fitting process. Which exchange lower variance by adding a bit bias. Particularlly, in each node when we want to grow the tree, only some of the variables (**mtry** as below analysis) will be selected as candidates. Then we chooce the best split value in these candidates as the criteria for the next level's tree. This process will be processed recursively in each level of the tree until we hit the maximum depth (**max.depth** as below anlaysis) or minimum node size of assigned observations. For another, we can always increase the depth of each tree to decrease the bias which will improve the final prediction accuracy just like ordinary decision tree.  
+
+In this section, I chooce different values of **mtry** and **max.depth** to verify the corresponding model's test prediction accuracy (With 100 image as test set). One of the important feature of random forest model is its out-of-bag (OOB) error estimate. This OOB error estimate is pretty close to N-fold cross-validaion performed during model construction. So it will be our another reference.
+
+```{r echo=FALSE, fig.height=9, fig.width = 12, out.width='0.8\\textwidth', out.height='0.5\\textwidth'}
+plot(max.depth, 
+     c(oob.accu.500[1],oob.accu.500[2],oob.accu.500[3]), 
+     type = 'b', xlab = "max.depth", ylim = c(0.67, 0.82),
+     ylab = "Accuracy",main = "Figure 5: Random Forest Accuracy with Tuning Paramters", col = 'orange',
+     cex.lab = 1.5, cex.main = 2, lwd = 4, cex = 2)
+lines(max.depth, c(test.accu.500[1],test.accu.500[2],test.accu.500[3]),
+      col = 'darkorange', type = 'b', pch = 2, lwd = 4, cex = 2)
+lines(max.depth, c(oob.accu.500[4],oob.accu.500[5],oob.accu.500[6]),
+      col = 'blue', type = 'b', pch = 1, lwd = 4, cex = 2)
+lines(max.depth, c(test.accu.500[4],test.accu.500[5],test.accu.500[6]),
+      col = 'darkblue', type = 'b', pch = 2, lwd = 4, cex = 2)
+lines(max.depth, c(oob.accu.500[7],oob.accu.500[8],oob.accu.500[9]),
+      col = 'lightgreen', type = 'b', pch = 1, lwd = 4, cex = 2)
+lines(max.depth, c(test.accu.500[7],test.accu.500[8],test.accu.500[9]),
+      col = 'green', type = 'b', pch = 2, lwd = 4, cex = 2)
+
+
+legend('topright', 
+       c("OOB Accuracy, mtry = 14", 
+         "Test Accuracy, mtry = 14", 
+         "OOB Accuracy, mtry = 16",
+         "Test Accuracy, mtry= 16",
+         "OOB Accuracy, mtry = 18",
+         "Test Accuracy, mtry = 18"
+         ), 
+       pch = rep(c(1:2),3),
+       col = c('orange','darkorange',
+              'blue','darkblue',
+              'lightgreen', 'green'),
+       lty = 1)
+```
+
+
+
+
+
+We can see the accuracy displayed in Figure 5. The OOB accuracy is generally lower than the test sample prediction accuracy. This make sense because the training set for the OOB accuracy is smaller than the training set for the test sample. We can see there is little change to the accuracy when the **mtry** is changed since we fit the random forest on the data after PCA, which will decrease the correlation between the principal components. As the **max.depth** increase from 1 to 3, both OOB accuracy and test accuracy will increase fast. This means the model performance will improve when our model complexity increase. After 3, both accuray do not change any more but stay around certain value (see Figure 4). This means the depth of tree has little influence to the test accuracy after we grow the trees to certain depth. However, the training accuracy will continue to increase unitl it hits 1, which means the model is overfitted even though it won't affect the test accuracy dramatically. Considering the model efficiency and prediction accuracy, I choose **max.depth** = 4 and **mtry** = 16 as the final model's parameters (Table 5).
+
+Based on the fitting result, we can argue that the random forest classification can be compatible with the 300-predictors dataset even though it's inefficient to the original dataset. 
+
+
+```{r echo=FALSE}
+display5 = matrix(c(16, 4, oob.accu.500[5],test.accu.500[5],500), ncol = 5)
+colnames(display5) = c('mtry','max.depth','OOB Accuray', 'Test Prediction Accuracy', 'Tree Number')
+kable(display5, caption = 'Final Model of Random Forest')
+```
+
+
+## **IV Literature review**
+
+&nbsp;&nbsp;&nbsp;&nbsp;We can definitely futher improve pixel-based model in previous section to achieve better performance. However, the project also emphasize on exploring the computer-aid diagnosis methods that's more intepretable to our customers, dermatologists. The pixel-based model we fitted in last section is basically values analysis to thousands of elements from sample images. Indeed, with previous models and the direct pixel values, we don't need to care how the image looks like visually. The image is the input to the black box and customers use the model to generate output label for diagnosis. That being said, pixel value classification process seems like a powerful machine learning application more than a handy analytic tool for skin cancer diagnosis. But machine learning is also powerful of mimicing human-being analysis procedure. The learning process and prediction preocess can be constructed by domain expertise in skin cancer detection effectively. The second part of this project will focus on building classification model on dermatologic diagnosis intimately.  
+
+Let's refer to the popular methods used in skin cancer examination as the beginning to this part. More than thirty years ago, dermatologists have recommanded the well-known ABCD rule for skin cancer detection and self-examination^[Robert J. Friedman. et. al. Early Detection of Malignant Melanoma:The Role of Physician Examination and Self-Examination of the Skin. CA-A Cancer Journal for Clinician Vol.35,No.3 May/Jun 1985.] ^[Robinson JK Rigel et. al. What promotes skin self-examination? J Am Acad Dermatol. 1998;38:752-757.] ^[Thomas L. et. al. Semiological value of ABCDE criteria in the diagnosis of cutaneous pigmented lesions. Dermatology 1998;197:11-17.]. Table 6 displays the detailed ABCD rule from Skin Cancer Foundation Website ^[https://www.skincancer.org/skin-cancer-information/melanoma/melanoma-warning-signs-and-images/]. Generally, we are supposed to exam the suspected area in our skin periodically whether it's symmetric with a line crossing the center, whether its border is smooth or jagged, whether its color is even, whether its small and apparently darker to its neighbor mole/skin. This rule is primitively generated by Melanoma early detection which is critical to this most fatal skin cancer but it has become the rule of thumb to all epidermal and melanocytic malignant detection. For decades, doctors and cancer research organization have made great effort to apply and distribute this knowledge to everyone^[Pauline F. Hanrahan. et. al. The effect of an educational brochure on knowledge and early detection of melanoma. Australian Journal of Public Health Volume 19, Issue 3, June 1995, Pages 270-274]. As the prerequisite of new classification models, later analysis will closely follow these rules to generate new features from the image dataset. 
+
+```{r echo=FALSE}
+Rule = c("Asymmetry", "Border", "Color", "Diameter/Dark")
+Description = c(
+  'Most melanomas are asymmetrical. If you draw a line through the middle of the lesion, the two halves don’t match, so it looks different from a round to oval and symmetrical common mole.',
+  'Melanoma borders tend to be uneven and may have scalloped or notched edges, while common moles tend to have smoother, more even borders.',
+  'Multiple colors are a warning sign. While benign moles are usually a single shade of brown, a melanoma may have different shades of brown, tan or black. As it grows, the colors red, white or blue may also appear.',
+  'While it’s ideal to detect a melanoma when it is small, it’s a warning sign if a lesion is the size of a pencil eraser (about 6 mm, or ¼ inch in diameter) or larger. Some experts say it is also important to look for any lesion, no matter what size, that is darker than others. Rare, amelanotic melanomas are colorless.'
+)
+display5 = cbind(Rule, Description)
+kable(display5, 'latex', caption = 'The ABCD Rule to Skin Cancer Diagnosis') %>% column_spec(2, width = "15cm")
+
+library(imager)
+```
+
+
+## **V Feature engineering**
+
+&nbsp;&nbsp;&nbsp;&nbsp;Before we start this section, let's come back to our sample images. Our images includes benign and malignant mole, like nevi(benign), seborrhoeic keratoses, squamous cell carcinomas, Basal cell carcinomas and melanomas. Even though they probably have its own chracteristics to the lesion area, it's difficult for people without training to identify the feature, sometimes it's challenging for dermatologists to confirm their diagnosis without biopsy exam. This is mostly because our raw eyes and recognition system may miss some important information from the images.  
+ 
+
+
+```{r echo=FALSE, fig.height=6.5, fig.width = 12,out.width='0.85\\textwidth', out.height='0.4\\textwidth'}
+
+# Area of lesion
+library(nabor)
+par(mfrow=c(2,4))
+par(mar = c(4, 5.5, 10.5, 5.5) - 4)
+ori = list.all.g1[[150 + 143]] #150 + 143
+cluster.knn = function(train,test,class,k=1)
+{
+    out = knn(train, test, k=k)
+    class[as.vector(out$nn.idx)] %>% matrix(dim(out$nn.idx)) %>% rowMeans
+}
+
+lesion = c(55, 40, 65, 50)
+skin = c(110, 40, 115, 50)
+sample.lesion = ((Xc(ori) %inr% lesion[c(1,3)]) & (Yc(ori) %inr% lesion[c(2,4)]))
+sample.skin = ((Xc(ori) %inr% skin[c(1,3)]) & (Yc(ori) %inr% skin[c(2,4)]))
+
+plot(ori, axes = FALSE, main = 'Original', cex.main = 3)
+text(9,5,label="(a)", col = 'white', cex = 3)
+highlight(sample.lesion)
+highlight(sample.skin, col = 'blue')
+
+ori.lab = sRGBtoLab(ori)
+cvt.mat = function(px) matrix(ori.lab[px],sum(px)/3,3)
+lesionMat = cvt.mat(sample.lesion)
+skinMat = cvt.mat(sample.skin)
+labels = c(rep(1,nrow(lesionMat)),rep(0,nrow(skinMat)))
+all.pixel = cvt.mat(px.all(ori))
+out = cluster.knn(rbind(lesionMat,skinMat),all.pixel,class=labels,k=5)
+
+effective.area = ((Xc(ori)-60)^2 + (Yc(ori)-45)^2) < 50^2
+plot(as.cimg(effective.area), axes = FALSE, main = 'Circle Mask')
+text(9,5,label="(b)", col = 'white', cex = 3)
+
+msk = (as.cimg(rep(out,3),dim=dim(ori)) *  effective.area) %>% threshold(thr = 0.99)
+plot(msk, axes = FALSE, main = 'Leision Area')
+text(9,5,label="(c)", col = 'white', cex = 3)
+
+msk.shrink = shrink(msk,2)
+plot(msk.shrink, axes = FALSE, main = 'Shrinked Area / Mask')
+text(9,5,label="(d)", col = 'white', cex = 3)
+
+plot(boundary(msk.shrink), axes = FALSE, main = 'Boundary', cex.main = 4, cex = 4)
+text(9,5,label="(e)", col = 'white', cex = 3)
+
+
+ori.grey = as.cimg((grayscale(ori)[,,1,1]*msk.shrink[,,,1]))
+plot(ori.grey, axes = FALSE, main = 'Greyscale Lesion after Masking')
+text(9,5,label="(f)", col = 'white', cex = 3)
+
+# plot(imgradient(ori.grey)$x, axes = FALSE, main = 'Lesion X Gradient')
+# text(9,5,label="(g)", col = 'white', cex = 3)
+
+# plot(imgradient(ori.grey)$y, axes = FALSE, main = 'Lesion Y Gradient')
+# text(9,5,label="(h)", col = 'white', cex = 3)
+
+col.pix = sort((ori.grey[ori.grey>0]), decreasing = T)
+max.difference = mean(col.pix[1:10]) - mean(col.pix[length(col.pix)-9: length(col.pix)])
+
+mtext('Figure 6: Feature Extraction Process',side = 3, line = -2, outer = T, cex = 2)
+
+plot(mirror(msk.shrink, 'y'), axes = FALSE, main = 'X-axis Mirror', cex.main = 4, cex = 4)
+text(9,5,label="(g)", col = 'white', cex = 3)
+
+plot(mirror(msk.shrink, 'x'), axes = FALSE, main = 'Y-axis Mirror', cex.main = 4, cex = 4)
+text(9,5,label="(h)", col = 'white', cex = 3)
+
+## Need more processed 
+## benign.processed = c(121, 113, 72, 33, 17, 24)
+## malignant.processed = c(34, 36, 4, 51)
+
+#Add one more column for area larger than 3/4 circle mask
+
+```
+
+
+```{r echo=FALSE}
+##Pre-pocessing image to make the lesion in the center.
+
+## malignant.processed = c(4, 27, 34, 36, 51)
+
+#malignant 4
+list.all.g1[[150+4]] = crop.borders(load.image(filenames.malignant[[4]]),nPix = 40)%>%resize(120,90)
+
+
+#malignant 27
+it = load.image(filenames.malignant[[27]])
+w1 = 151
+w2 = 974
+h1 = 1
+h2 = 615
+mask.27 = (Xc(load.image(filenames.malignant[[27]])) %inr% c(w1,w2) & (Yc(load.image(filenames.malignant[[27]])) %inr% c(h1,h2)))
+list.all.g1[[150 + 27]] = as.cimg(it[mask.27], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+#malignant 34
+it = load.image(filenames.malignant[[34]])
+w = 784
+h = 630
+mask.34 = (Xc(load.image(filenames.malignant[[34]])) %inr% c(1,w) & (Yc(load.image(filenames.malignant[[34]])) %inr% c(1,h)))
+list.all.g1[[150+34]] = as.cimg(it[mask.34], x = w, y = h, z = 1, cc = 3) %>% resize(120,90)
+
+#malignant 36
+it = load.image(filenames.malignant[[36]])
+w = 924
+h = 768
+mask.36 = (Xc(load.image(filenames.malignant[[36]])) %inr% c(1,w) & (Yc(load.image(filenames.malignant[[36]])) %inr% c(1,h)))
+list.all.g1[[150+36]] = as.cimg(it[mask.36], x = w, y = h, z = 1, cc = 3) %>% resize(120,90)
+
+#malignant 51
+list.all.g1[[150+51]] = crop.borders(load.image(filenames.malignant[[51]]),nPix = 130)%>%resize(120,90)
+
+
+##benign.processed = c(17, 24, 33, 72, 113, 121)
+
+#benign 17
+it = load.image(filenames.benign[[17]])
+w = 2048
+h = 1236
+mask.17 = (Xc(load.image(filenames.benign[[17]])) %inr% c(1,w) & (Yc(load.image(filenames.benign[[17]])) %inr% c(1,h)))
+list.all.g1[[17]] = as.cimg(it[mask.17], x = w, y = h, z = 1, cc = 3) %>% resize(120,90)
+
+#benign 24
+it = load.image(filenames.benign[[24]])
+w1 = 65
+w2 = 657
+h1 = 51
+h2 = 492
+mask.24 = (Xc(load.image(filenames.benign[[24]])) %inr% c(w1,w2) & (Yc(load.image(filenames.benign[[24]])) %inr% c(h1,h2)))
+list.all.g1[[24]] = as.cimg(it[mask.24], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+#benign 33
+it = load.image(filenames.benign[[33]])
+w1 = 1
+w2 = 617
+h1 = 1
+h2 = 463
+mask.33 = (Xc(load.image(filenames.benign[[33]])) %inr% c(w1,w2) & (Yc(load.image(filenames.benign[[33]])) %inr% c(h1,h2)))
+list.all.g1[[33]] = as.cimg(it[mask.33], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+#benign 72
+it = load.image(filenames.benign[[72]])
+w1 = 61
+w2 = 540
+h1 = 91
+h2 = 450
+mask.72 = (Xc(load.image(filenames.benign[[72]])) %inr% c(w1,w2) & (Yc(load.image(filenames.benign[[72]])) %inr% c(h1,h2)))
+list.all.g1[[72]] = as.cimg(it[mask.72], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+#benign 113
+it = load.image(filenames.benign[[113]])
+w1 = 1
+w2 = 450
+h1 = 21
+h2 = 358
+mask.113 = (Xc(load.image(filenames.benign[[113]])) %inr% c(w1,w2) & (Yc(load.image(filenames.benign[[113]])) %inr% c(h1,h2)))
+list.all.g1[[113]] = as.cimg(it[mask.113], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+#benign 121
+it = load.image(filenames.benign[[121]])
+w1 = 1
+w2 = 480
+h1 = 1
+h2 = 360
+mask.121 = (Xc(load.image(filenames.benign[[121]])) %inr% c(w1,w2) & (Yc(load.image(filenames.benign[[121]])) %inr% c(h1,h2)))
+list.all.g1[[121]] = as.cimg(it[mask.121], x = w2-w1+1, y = h2-h1+1, z = 1, cc = 3) %>% resize(120,90)
+
+```
+
+```{r echo=FALSE}
+
+## Feature Extraction
+
+lesion.area = c()
+lesion.perimeter = c()
+asymmetrics = c()
+color.difference = c()
+compactness = c()
+cvt.mat = function(px) matrix(ori.lab[px],sum(px)/3,3)
+
+lesion = c(55, 40, 65, 50)
+skin = c(110, 40, 115, 50)
+
+for (i in 1:300){
+  
+  ori = list.all.g1[[i]]
+  
+  sample.lesion = ((Xc(ori) %inr% lesion[c(1,3)]) & (Yc(ori) %inr% lesion[c(2,4)]))
+  sample.skin = ((Xc(ori) %inr% skin[c(1,3)]) & (Yc(ori) %inr% skin[c(2,4)]))
+  
+ori.lab = sRGBtoLab(ori)
+
+lesionMat = cvt.mat(sample.lesion)
+skinMat = cvt.mat(sample.skin)
+labels = c(rep(1,nrow(lesionMat)),rep(0,nrow(skinMat)))
+all.pixel = cvt.mat(px.all(ori))
+out = cluster.knn(rbind(lesionMat,skinMat),all.pixel,class=labels,k=5)
+
+effective.area = ((Xc(ori)-60)^2 + (Yc(ori)-45)^2) < 50^2
+
+msk = (as.cimg(rep(out,3),dim=dim(ori)) *  effective.area) %>% threshold(thr = 0.99)
+
+msk.shrink = shrink(msk,2)
+
+## Asymmetrics
+ 
+x.direct.mirror = mirror(msk.shrink, 'x')[,,,1]
+y.direct.mirror = mirror(msk.shrink, 'y')[,,,1]
+asy = sum(abs(msk.shrink[,,,1] - x.direct.mirror))+
+      sum(abs(msk.shrink[,,,1] - y.direct.mirror)) 
+asymmetrics = append(asymmetrics, asy)
+
+## Boundary Vector
+bd = (as.numeric(boundary(msk.shrink)[,,,1]) == 1) %>% sum
+lesion.perimeter = append(lesion.perimeter, bd)
+
+
+## Area Vector
+area = as.numeric(msk.shrink[,,,1])%>%sum
+lesion.area = append(lesion.area, area)
+
+##Compactness Vector
+comp = bd^2/4/pi/area
+compactness = append(compactness, comp)
+
+ori.grey = as.cimg((grayscale(ori)[,,1,1]*msk.shrink[,,,1]))
+
+# max.difference = max(ori.grey[ori.grey>0]) - min(ori.grey[ori.grey>0])
+
+## Color Difference Vector
+col.pix = sort((ori.grey[ori.grey>0]), decreasing = T)
+max.difference = mean(col.pix[1:10]) - mean(col.pix[(length(col.pix)-9): length(col.pix)])
+
+color.difference = append(color.difference, max.difference)
+}
+```
+
+In this section, an image processing package `imager` in R is applied to image loading, feature extraction. I also use dedicated algorithm simultanesouly to make this procedure more efficient. Here is detail. The raw images will be loaded by the imager loading/resizing function. Some of them may come with the dark corner (Figure 6 (a)) that's generated by the round circular lens designed for smaller sensor. I first apply a mask (Figure 6 (b)) to the picture to exclude these section from our Area of Interest (AOI). Then I choose two areas as the lesion area (red square in the middle of Figure 6 (a)) and background skin area (blue rectangle in Figure 6 (a)). Their pixels are labelled by assigned class (lesion or skin). A 1-KNN algorithm is then applied to the whole image area with previous two areas as the training set. With this algorithm, we will effectively identify the lesion area from the image background(Figure 6 (c)). In order to make this work easier, all the images will be processed to same resolution (110W x 90H x 3C) and the lesion area will be consistently centered in the image prior to the KNN method. Because 1-KNN method is very sensitive, the boundary is sharp and probably too curly. So I will shrink the detected area with a small value(Figure 6 (d)). Then the image will go through normal boundary detection function to generate the boundary (Figure 6 (e)). Meanwhile, the detected lesion area is applied to the greyscale picture as a mask (Figure 6 (f)). Figure 7 shows some samples with their lesion identification. After this effective image processing, we are ready to generate our diagnosis features:  
+
+### Asymmetrics:
+&nbsp;&nbsp;&nbsp;&nbsp;Figure 6 (g) and (h) show the lesion area mirro about the X-axis and Y-axis. For consistency, the asymmetrics will be sum of X-axis mirror images area difference and Y-axis mirror images area difference for all images. 
+
+### Border:
+&nbsp;&nbsp;&nbsp;&nbsp;We can conviniently extract the boundary length and the lesion area from the output image in Figure 6. In fact, we care about the relationship between border and the lesion area. That is, how curly the border is to the lesion area. The most effective metric to this is compactness^[Lawrence H. Staib et. al. Boundary fitting with parametrically deformable models. IEEE Transactions on Pattern Analysis and Machine Intelligence, Vol. 14, No. 11, Nov 199.] 
+$$Compactness = \frac{(Border)^2}{4*\pi*Area}$$
+This is the feature that described whether the lesion border is uneven or scalloped (Table 6). In Figure 7, the compactness of these are `r compactness[48]`, `r compactness[49]`, `r compactness[151]` and `r compactness[276]`.
+
+### Color:
+&nbsp;&nbsp;&nbsp;&nbsp;Greyscale difference can be calculated in the output images with the lesion mask (Figure 6 (f)). Here I use the greyscale difference between the top 10 values average and bottom 10 values average to prevent noise influence. For another, greyscale can alleviate impact from luminence fluctuation since the three color channel is merged to get the greyscale. 
+
+### Diameter/Dark:
+&nbsp;&nbsp;&nbsp;&nbsp;Lesion area will be our new feature as well. However, it shall be noticed that the area size will be closely related to the image capture distance and magnification which may be quite different between samples. 
+
+```{r echo=FALSE, fig.height=6.5, fig.width = 12,out.width='0.85\\textwidth', out.height='0.4\\textwidth'}
+
+par(mfrow=c(2,4))
+par(mar = c(4, 5.5, 10.5, 5.5) - 4)
+
+for (i in c(48, 49, 151, 276)){
+ori = list.all.g1[[i]]
+sample.lesion = ((Xc(ori) %inr% lesion[c(1,3)]) & (Yc(ori) %inr% lesion[c(2,4)]))
+sample.skin = ((Xc(ori) %inr% skin[c(1,3)]) & (Yc(ori) %inr% skin[c(2,4)]))
+plot(ori, axes = FALSE, main = 'Original', cex.main = 3)
+ori.lab = sRGBtoLab(ori)
+cvt.mat = function(px) matrix(ori.lab[px],sum(px)/3,3)
+lesionMat = cvt.mat(sample.lesion)
+skinMat = cvt.mat(sample.skin)
+labels = c(rep(1,nrow(lesionMat)),rep(0,nrow(skinMat)))
+all.pixel = cvt.mat(px.all(ori))
+out = cluster.knn(rbind(lesionMat,skinMat),all.pixel,class=labels,k=5)
+effective.area = ((Xc(ori)-60)^2 + (Yc(ori)-45)^2) < 50^2
+msk = (as.cimg(rep(out,3),dim=dim(ori)) *  effective.area) %>% threshold(thr = 0.99)
+plot(msk, axes = FALSE, main = 'Leision Area')
+}
+mtext('Figure 7: Lesion Detection Samples',side = 3, line = -2, outer = T, cex = 2)
+```
+
+
+
+
+
+
+## **VI Classification models based on new features**
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;With the new generated features, we are ready to construct new classification model that's highly related to the dermatologistic diagnosis. Let's first glimpse our new features before we fit the models. Table 7 presents the covariance to the ABCD features generated above. Interestingly, The **lesion.area** seems to positively related to **asymmetrics**, which means in our dataset, the large lesion is more likely to be assymmetric. Also, compactness is positively related to assymmetric as well. This makes sense because the more complicated/uneven the boundary is, the less likely to see the symmetric lesion. 
+
+### Logistic Regression
+
+&nbsp;&nbsp;&nbsp;&nbsp;As a straightforward model, logistic regression is a good fit to our binary class dataset. Logistic regression is generally a linear classification method that applied the similar idea from linear regression. The response is transformed probablity that's projected to another space by ligit link function. The predictors coefficient is fitted based on the link function value and linear combination of predictors. We can apply similar estimation to the logistic regression model directly. So, similar to pixel-based classification model, the dataset will be firstly separated into train set (200 samples) and test set(100 samples) before model fitting. And 0 is assigned to benign and 1 is assigned to malignant. Below is the summary to the logistic regression model coefficients:
+
+
+
+```{r echo=FALSE}
+## Logistic Regression
+
+df = data.frame(label = (rep(c(0,1),each = 150)),
+           asymmetrics, compactness, color.difference, lesion.area)
+
+# df = data.frame(
+#             asymmetrics, compactness, color.difference, lesion.area)
+# df = data.frame(scale(df))
+# df = cbind(label = (rep(c(0,1),each = 150)), df)
+
+kable(as.matrix(cor(df[,-1])), caption = 'Covariance of Features')
+```
+
+```{r echo=FALSE}
+set.seed(10)
+train = sample(300,200)
+
+glm.fit = glm(label~., data = df[train,], family = "binomial")
+
+pred.glm = predict(glm.fit, df[-train,], type = "response")
+pred.glm.pb = pred.glm
+
+glm.accu = mean(ifelse(pred.glm<0.5,0,1) == df$label[-train])
+
+display6 = as.matrix(table(ifelse(pred.glm<0.5,0,1), df$label[-train]))
+```
+
+```{r echo=TRUE}
+coef(summary(glm.fit))
+```
+
+
+
+```{r echo=FALSE}
+## LDA
+library(MASS)
+
+lda.fit = lda(df[train,2:5],df[train,1])
+predict.lda = predict(lda.fit, df[-train, 2:5])$class
+## If we call the posterior, the possibility result is flipped. 
+predict.lda.pb = predict(lda.fit, df[-train, 2:5])
+pred.lda.pb = predict.lda.pb$posterior[,2]
+
+lda.accu = mean(predict.lda==df[-train,1])
+
+display7 = as.matrix(table(predict.lda, df[-train,1]))
+
+## Logistic Regreesion and LDA are closely related.
+
+```
+
+```{r echo=FALSE}
+display8 = cbind(c('LR.pred.0', 'LR.pred.1'), display6, c(' ',' '), c('LDA.pred.0', 'LDA.pred.1'),display7)
+rownames(display8) = c('','')
+colnames(display8) = c('Prediction', 'True 0', 'Ture 1', ' ', 'Prediction', 'True 0' , 'Ture 1')
+kable(display8, caption = 'Confusion Table to Logistic Regression and LDA')
+```
+  
+  
+
+```{r echo=FALSE, fig.height=9, fig.width = 18, out.width='0.9\\textwidth', out.height='0.5\\textwidth'}
+# ROC
+library(pROC)
+
+par(mfrow=c(1,2))
+par(mar = c(4, 4, 4, 4)+.1)
+
+# Must make a radial kernel model first, put probability = T inside the svm() and predict()
+LR.roc = roc(df[-train,1], pred.glm.pb, legacy.axes = T, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", quiet = T, plot = F, main = 'Figure 8: ROC to LR model', col = 'darkorange', lwd = 3, auc = T, cex.lab = 1.6, cex.main = 2
+)
+
+plot(LR.roc, main = 'Figure 8: ROC to LR model', xlab = '1 - False Positive Percentage', ylab = "True Positive Percentage", col = 'darkorange', lwd = 3, cex.lab = 1.6, cex.main = 2, asp = NA)
+
+text(0.4, 0.4, paste('LR AUC =',as.character(LR.roc$auc)))
+legend('bottomright', c('LR'), lty = 1, col = c('darkorange'), lwd = 2)
+
+LDA.roc = roc(df[-train,1], pred.lda.pb, legacy.axes = T, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", quiet = T, plot = F, main = 'Figure 9: ROC to LDA model', col = 'deepskyblue', lwd = 3, auc = T, cex.lab = 1.6, cex.main = 2
+)
+
+plot(LDA.roc, main = 'Figure 9: ROC to LDA model', xlab = '1 - False Positive Percentage', ylab = "True Positive Percentage", col = 'deepskyblue', lwd = 3, cex.lab = 1.6, cex.main = 2, asp = NA)
+
+
+# plot(cc, xlab = 'False Positive Percentage', ylab = "True Positive Percentage", xaxt = 'n')
+# axis(1, at=1:4, labels=c('0.0','0.2', '0
+#                          4', '0.6'))
+# Can also put xlab = 'False Positive Percentage', ylab = "True Positive Percentage", set the color and lwd or print.auc = TRUE
+## All there is inside the roc()
+
+text(0.4, 0.4, paste('LDA AUC =',as.character(LDA.roc$auc)))
+legend('bottomright', c('LDA'), lty = 1, col = c('deepskyblue'), lwd = 2)
+
+```
+
+The model coefficient shows that only the **compactness** feature is significant in the logistic regression model. This is related to the consistency issue in our sample images. The color and area size can be quite influenced by picture capture process but compactness is less likely to be affected since it's the description to the complexity of lesion boundary. The asymmetrics is also not significant in the logistic regression model. This is because we can only get the asymmetric level by x axis and y axis mirror images. 
+
+As for the similarity of logistic regreesion and linear discriminant analysis(LDA), I will also present the result from LDA for comparison. Both models are fitted on the same train set and test set. 
+After model fitting, we have the classification accuracy to the logistic regression and LDA:  
+
+-- Logistic Regression : ``r glm.accu``  
+  
+-- LDA : ``r lda.accu``  
+
+
+They are the same. As for the confusion table of the classification (Table 8), the result are the same. Figure 8 and Figure 9 are the ROC to the logistic regression model and LDA model. They are also very close to each other. This proved our knowledge to these models. The relationship between response and coefficient are the same. The only difference between these procedure are the estimation approach. 
+
+```{r echo=FALSE, fig.height=8, fig.width = 11, out.width='0.7\\textwidth', out.height='0.4\\textwidth'}
+library(glmnet)
+cv.ridge = cv.glmnet(as.matrix(df[train,2:5]), as.matrix(df[train,1]), alpha = 1, family = "binomial", type.measure = "class")
+cv.ridge.accu = mean(predict(cv.ridge, s=cv.ridge$lambda.min, newx = as.matrix(df[-train,2:5]), type = "class") == df[-train,1])
+# table(as.numeric(predict(cv.ridge, s=cv.ridge$lambda.min, newx = as.matrix(df[-train,2:5]), type = "class")), df[-train,1])
+```
+
+
+### Decision Tree
+
+
+```{r echo=FALSE, out.width='.8\\textwidth'}
+##Tree
+## Fit a single tree
+library(rpart)
+library(rpart.plot)
+
+set.seed(5)
+train = sample(300,200)
+
+single.tree = rpart(label ~ ., data = df[train, ], 
+                    method = "class", control = list(cp = 0))
+
+tree.result = predict(single.tree, 
+                      newdata = df[-train,2:5])
+
+tree.accuracy = mean((tree.result[,1]<tree.result[,2]) == df[-train,1])
+
+## The cp table
+kable(single.tree$cptable, caption = 'CP Table of Classification Tree')
+
+## The cp plot
+# plotcp(single.tree)
+
+## ## Minimal xerror method
+row.m = order(single.tree$cptable[,4])[1]
+cp.best = (single.tree$cptable[row.m,1] + single.tree$cptable[row.m-1,1]) / 2
+single.tree.pruned.m = prune(single.tree, cp = cp.best)
+
+
+tree.result.m = predict(single.tree.pruned.m, 
+                      newdata = df[-train,2:5])
+
+tree.accuracy.m = mean((tree.result.m[,1]<tree.result.m[,2]) == df[-train,1])
+
+
+# ## 1se method IS NOT APPLIED in THIS PROJECT
+# 
+# ## Calculate the minimal cv error and corresponding cv standard error  
+#  # for the cost parameters. 
+# row = order(single.tree$cptable[,4])[1]
+# se = single.tree$cptable[row,5]
+# lowest.row = 0
+# for (i in 1:length(single.tree$cptable[,4])){  
+#   if(single.tree$cptable[i,4]>=(single.tree$cptable[row,4] + se)){
+#     lowest.row = lowest.row + 1
+#   } else{
+#     break
+#   }
+# }
+# cp.1se = (single.tree$cptable[lowest.row,1] + single.tree$cptable[lowest.row + 1,1])/2
+# 
+# ## Prune the tree using 1se rule
+# single.tree.pruned = prune(single.tree, cp = cp.1se)
+
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp; As for the interpretability, decision tree will be on top of regression and classification model. Tree algorithm is based on the split rule in each node. From the root to the level on top of leaf node, we recursively search a split variable and cutting value to split the observation and assign observations into corresponding nodes. Finally we will reach a point where we don't want to split the observations any more and they'll be kept in specific leaf node. This is tree-growing procedure. The full tree will be pruned to prevent overfitting and decrease the variance. Generally, decision tree is straightforward for application in diagnosis and easy to learn. It's also very powerful tool to present the skin cancer detection process to the patients. Here I will investigate the performance to the tree model. The following single tree model is fitted by the rpart package. Figure 10 is the full-grown tree and the sample percentage in each split. 
+Pruning a tree is as important as, if not more than, the tree-growing procedure. In this section, cp value and its corresponding cross-validation error(xerror) is the pruning reference. The minimal xerror is located from the cp value table, the tree will be pruned to the level just on top of the level with minimal xerror. By doing so, we exchange the lower variance by a little more bias and more stable model. Figure 11 (Here 0 means benign and 1 means malignant) shows the pruned tree model with the observation class percentage in nodes of each level. 
+
+
+
+```{r echo=FALSE, fig.height=6, fig.width = 17, out.width='1.05\\textwidth', out.height='0.4\\textwidth'}
+# par(mfrow = c(1, 1))
+# par(mar=rep(0.5,4))
+
+# rpart.plot(single.tree, roundint = F, main = "Whole Tree with NO Pruning", cex.main = 1, cex = 0.7, extra = 104, shadow.col = 'grey')
+
+
+# par(mfrow = c(1, 2))
+
+layout.matrix <- matrix(c(1, 2),  ncol = 2, byrow = T)
+layout(mat = layout.matrix,
+       heights = c(1, 1), # Heights of the two rows
+       widths = c(2.7, 1.8))
+
+rpart.plot(single.tree, roundint = F, main = "Figure 10: Whole Tree with NO Pruning", cex.main = 1.5, cex = 1, extra = 104, shadow.col = 'grey')
+
+# rpart.plot(single.tree.pruned, roundint = F, main = "Pruned Tree with 1se Rule", cex.main = 1, cex = 1, extra = 104, shadow.col = 'grey')
+
+rpart.plot(single.tree.pruned.m, roundint = F, main = "Figure 11: Pruned Tree with minimal Xerror", cex.main = 1.5, cex = 1, extra = 104, shadow.col = 'grey')
+
+
+
+```
+
+The test accuracy is `r tree.accuracy.m`. It's relatively lower comparing to other classifier we generate in previous sections. However, we are able to analyze our dataset by a straightforward tree model by the explicite spliting rule. From the pruned tree model in Figure 11, we can see the compactness is also the important parameters in our split rule, which matches our findings in logistic model. 
+
+
+### Summary
+&nbsp;&nbsp;&nbsp;&nbsp;From the prediction accuracy, we can conclude that the extracted features are effective to be the predictors in our models. With very basic procedure and little parameters tuning, we have made remarkable progress that's comparable to the specialists' work twenty years ago. The **conpactness** feature is more important than other features in model prediction. The logistic regression model and decision tree model fitted in this section is basic application to the feature we generated.  More sophisticated learning process is available immediately although they may not be as intepretable as the models we presented here. 
+
+## **VII Conclusion**
+
+&nbsp;&nbsp;&nbsp;&nbsp;This project presents two types of classification methods on the skin cancer sample images. The first one is to contruct classification model based on the pixel value, which is closely related to learning model mechanism, and model performance in theory. The second one is based on more advanced image processing or feature engineering that's on top of the sample images, together with specialists' knowledge and domain expertise. Multiple classification models are applied in these sections. Some common statistical learning analysis are utilized to evaluate these model's prediction accuracy and related properties. Further exploration to above content should be ready for next action. 
+
+
+
+
+
+
+
+
+
+
+
+
