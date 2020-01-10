@@ -19,9 +19,10 @@ header:
 
 
 <figure class="half">
-    <figcaption>Learning</figcaption>
-    <a href="/images/20141121_082628.jpg"><img src="/images/20141121_082628.jpg"></a>
-    <a href="/images/20141121_082632.jpg"><img src="/images/20141121_082632.jpg"></a>   
+    <figcaption>SVM</figcaption>
+    <a href="/images/SVM.jpg"><img src="/images/SVM.jpg"></a>
+    <figcaption>K-means</figcaption>
+    <a href="/images/K_means.jpg"><img src="/images/K_means.jpg"></a>   
 </figure>
 
 
