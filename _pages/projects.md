@@ -1,5 +1,5 @@
 ---
-layout: archive
+layout: single
 toc: true
 toc_label: Table of contents title
 permalink: /projects/
