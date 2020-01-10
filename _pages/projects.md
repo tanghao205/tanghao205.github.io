@@ -24,9 +24,10 @@ it is based on detection in the early stage. Regular skin self-exams is very imp
 - Support Vector Machine
 - Random Forest
 
-<figure class="half">
+<figure class="three">
     <a href="/images/SVM.JPG"><img src="/images/SVM.JPG"></a>
-    <a href="/images/K_means.JPG"><img src="/images/K_means.JPG"></a>   
+    <a href="/images/K_means.JPG"><img src="/images/K_means.JPG"></a> 
+    <a href="/images/RF.jpg"><img src="/images/RF.jpg"></a>   
 </figure>
 
 The second part is to extract visible features from the images after effective image processing (applying machine learning in image pocessing), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
