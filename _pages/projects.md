@@ -12,7 +12,7 @@ toc: true
 This is my page about the productive project I did previously about my computer science degree and coding work. Some of the projects are very interesting application to the machine learning and data engineering. The others are applicable coding works that help me to do my engineering work in my job. 
 
 
-## Practical Learning
+# Practical Learning
 
 
 <figure class="half">
@@ -24,9 +24,9 @@ This is my page about the productive project I did previously about my computer 
 
 
 
-## Applied Machine Learning
+# Applied Machine Learning
 
 
-## Data Visualization
+# Data Visualization
 
-## Distributed System (Cloud Computing Basics)
+# Distributed System (Cloud Computing Basics)
