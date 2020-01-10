@@ -5,6 +5,7 @@ title: "projects"
 author_profile: true
 header:
   image: "/images/H3.jpg"	
+toc: true
 
 ---
 
