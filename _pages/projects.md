@@ -29,7 +29,7 @@ it is based on detection in the early stage. Regular skin self-exams is very imp
     <a href="/images/K_means.JPG"><img src="/images/K_means.JPG"></a>   
 </figure>
 
-The second part is to extract visible features from the images after effective image processing, then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
+The second part is to extract visible features from the images after effective image processing (applying machine learning in image pocessing), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
 
 - Logistic Regression
 - Decision Tree
