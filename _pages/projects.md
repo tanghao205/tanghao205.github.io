@@ -1,5 +1,7 @@
 ---
 layout: archive
+toc: true
+toc_label: Table of contents title
 permalink: /projects/
 title: "projects"
 author_profile: true
@@ -7,9 +9,6 @@ header:
   image: "/images/H3.jpg"	
 toc: true
 
----
----
-toc: true
 ---
 
 
