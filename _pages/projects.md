@@ -1,7 +1,7 @@
 ---
 layout: single
 toc: true
-toc_label: Table of contents title
+toc_label: Table of Contents
 permalink: /projects/
 title: "projects"
 author_profile: true
@@ -32,3 +32,10 @@ This is my page about the productive project I did previously about my computer 
 # Data Visualization
 
 # Distributed System (Cloud Computing Basics)
+
+# Practical Data Cleaning
+
+# Cloud Computing Application
+
+# Advanced Beyesian Modeling
+
