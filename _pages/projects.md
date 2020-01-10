@@ -8,14 +8,12 @@ header:
   image: "/images/H3.jpg"	
 
 ---
-
+<style type="text/css">
 h1.title {
   font-size: 38px;
   color: DarkRed;
 }
-
-The following projects include the major interesting field in my computer science study.  
-- Practical Learning
+</style>
 
 
 # Wine Review Learning and Recomdation
