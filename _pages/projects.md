@@ -20,3 +20,13 @@ This is my page about the productive project I did previously about my computer 
     <a href="/assets/images/image-filename-1-large.jpg"><img src="/images/20141121_082628.jpg"></a>
     <a href="/assets/images/image-filename-2-large.jpg"><img src="/images/20141121_082632.jpg"></a>   
 </figure>
+
+
+
+
+## Applied Machine Learning
+
+
+## Data Visualization
+
+## Distributed System (Cloud Computing Basics)
