@@ -1,5 +1,5 @@
 ---
-layout: archive
+layout: single
 permalink: /coding/
 title: "coding"
 author_profile: true
