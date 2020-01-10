@@ -1,7 +1,6 @@
 ---
 layout: single
-toc: true
-toc_label: Table of Contents
+classes: wide
 permalink: /projects/
 title: "projects"
 author_profile: true
