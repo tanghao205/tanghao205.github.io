@@ -20,9 +20,9 @@ header:
 
 <figure class="half">
     <figcaption>SVM</figcaption>
-    <a href="/images/SVM.jpg"><img src="/images/SVM.jpg"></a>
+    <a href="/images/SVM.JPG"><img src="/images/SVM.JPG"></a>
     <figcaption>K-means</figcaption>
-    <a href="/images/K_means.jpg"><img src="/images/K_means.jpg"></a>   
+    <a href="/images/K_means.JPG"><img src="/images/K_means.JPG"></a>   
 </figure>
 
 
