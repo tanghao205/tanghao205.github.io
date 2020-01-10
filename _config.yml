@@ -300,7 +300,7 @@ defaults:
 #_pages
   - scope:
       path: ""
-      type: pages
+      type: archive
     values:
       layout: single
       author_profile: true
