@@ -16,7 +16,7 @@ This is my page about the productive project I did previously about my computer 
 
 
 <figure class="half">
+    <figcaption>Learning</figcaption>
     <a href="/assets/images/image-filename-1-large.jpg"><img src="/images/20141121_082628.jpg"></a>
-    <a href="/assets/images/image-filename-2-large.jpg"><img src="/images/20141121_082632.jpg"></a>
-    <figcaption>Caption describing these two images.</figcaption>
+    <a href="/assets/images/image-filename-2-large.jpg"><img src="/images/20141121_082632.jpg"></a>   
 </figure>
