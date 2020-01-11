@@ -1,7 +1,7 @@
 ---
 layout: archive
 classes: wide
-permalink: /ML/
+permalink: /projects/
 title: "Machine Learning"
 
 author_profile: true
