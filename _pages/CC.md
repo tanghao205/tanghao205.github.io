@@ -1,7 +1,7 @@
 ---
 layout: archive
 permalink: /CC/
-title: "Cloud Computing"
+title: " "
 
 author_profile: true
 header:
