@@ -37,7 +37,7 @@ it is based on detection in the early stage. Regular skin self-exams is very imp
 - Support Vector Machine
 - Random Forest
 
-{% include skin_cancer %}
+{% include gallery id="skin_cancer" layout="three" %}
 
 <figure class="three">
     <a href="/images/SVM.JPG"><img src="/images/SVM.JPG"></a>
