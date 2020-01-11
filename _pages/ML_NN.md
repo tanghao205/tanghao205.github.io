@@ -2,7 +2,7 @@
 layout: archive
 classes: wide
 permalink: /ML_NN/
-title: "Machine Learning & Neural Net"
+title: "ML_NN"
 
 author_profile: true
 header:
