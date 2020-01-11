@@ -10,14 +10,14 @@ header:
 skin_cancer:
   - image_path: /images/SVM.JPG
     alt: "Support Vector Machine"
-    title: "Super customizable"
+    title: "Support Vector Machine"
     url: /images/SVM.JPG
   - image_path: /images/K_means.JPG
     alt: "K-Nearest-Neighbor"
-    title: "Responsive layouts"
+    title: "K-Nearest-Neighbor"
     url: /images/K_means.JPG
   - image_path: /images/RF1.jpg
-    alt: "100% free"
+    alt: "Random Forest"
     title: "Random Forest"
     url: /images/RF1.jpg
 ---
