@@ -1,12 +1,11 @@
 ---
-layout: archive
-classes: wide
+layout: single
 permalink: /CC/
 title: "CC"
 
 author_profile: true
 header:
-  image: "/images/H3.jpg"	
+  image: "/images/H0.jpg"	
   
 
 skin_cancer:
