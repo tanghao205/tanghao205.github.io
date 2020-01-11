@@ -28,9 +28,11 @@ skin_cancer:
 
 # Wine Review Learning and Recomdation
 
+
 <figure>   
     <a href="/images/winemag.jpg"><img src="/images/winemag.jpg"></a>
 </figure>
+[WineEnthusiast Magazine](https://www.winemag.com/)
 
 # Skin Cancer Diagnosis Learning
 
