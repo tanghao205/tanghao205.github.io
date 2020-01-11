@@ -1,5 +1,5 @@
 ---
-layout: single
+layout: archive
 permalink: /CC/
 title: "CC"
 
