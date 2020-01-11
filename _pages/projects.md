@@ -11,17 +11,17 @@ skin_cancer:
   - image_path: /images/SVM.JPG
     alt: "Support Vector Machine"
     title: "Super customizable"
-    excerpt: "Pic 1"
+
     url: "/images/SVM.JPG"
   - image_path: /images/K_means.JPG
     alt: "K-Nearest-Neighbor"
     title: "Responsive layouts"
-    excerpt: "Pic 2"
+
     url: "/images/K_means.JPG"
   - image_path: /images/RF1.jpg"
     alt: "100% free"
     title: "Random Forest"
-    excerpt: "Pic 3"
+
     url: "/images/RF1.jpg"
 ---
 
