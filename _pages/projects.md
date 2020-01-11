@@ -48,6 +48,13 @@ skin_cancer_2:
 </figure>
 [**WineEnthusiast Magazine**](https://www.winemag.com/)
 
+Life is data. 
+Here the machine learning is going to tell the wine's story by doing testers' job. 
+
+I used two popular ML models, *Random Forest* and *Boosting* to build the regression model on the wine score with the data from **Winemag**. 
+
+By recommanding the Pinot Noir from outstanding winery, we can also see testers' preference or inclination.
+
 # Skin Cancer Diagnosis Learning
 
 Skin cancer, as the abnormal growth of skin cell, is one of the most common cancer in the US. The curing effect to
@@ -61,9 +68,7 @@ The first part of the project is to fit three classifiers on the skin cancer ima
 - **Support Vector Machine**
 - **Random Forest**
 
-{% include gallery id="skin_cancer" layout="three" %}
-
-
+{% include gallery id="skin_cancer" layout="three" %}  
 
 The second part is to extract visible features from the images after effective image processing (*applying knn in skin area recognition*), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
 
