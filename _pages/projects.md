@@ -110,6 +110,11 @@ Our data is based on one of famous New York Public Library project which track t
 Cleaning process focus on missing data, informal input or inconsistent format. 
 The post-processed data are used to input SQLite for integrity constraint (IC) check. Very neat scientific workflow is generated to describe the cleaning roadmap in YesWorkflow program.  
 
+<figure>   
+    <a href="/images/YWF.jpg"><img src="/images/YWF.jpg"></a>
+    <figcaption>YesWorkFlow to Data Cleaning Process.</figcaption>
+</figure>
+
 [Here is the Report](https://drive.google.com/file/d/1WlkwBezYAV35sIIWqUu__cQTIulCS-Nn/view?usp=sharing)
 
 # Cloud Computing Application
