@@ -11,18 +11,15 @@ skin_cancer:
   - image_path: /images/SVM.JPG
     alt: "Support Vector Machine"
     title: "Super customizable"
-
-    url: "/images/SVM.JPG"
+    url: /images/SVM.JPG
   - image_path: /images/K_means.JPG
     alt: "K-Nearest-Neighbor"
     title: "Responsive layouts"
-
-    url: "/images/K_means.JPG"
+    url: /images/K_means.JPG
   - image_path: /images/RF1.jpg"
     alt: "100% free"
     title: "Random Forest"
-
-    url: "/images/RF1.jpg"
+    url: /images/RF1.jpg
 ---
 
 
@@ -40,7 +37,7 @@ it is based on detection in the early stage. Regular skin self-exams is very imp
 - Support Vector Machine
 - Random Forest
 
-{% include skin_cancer caption="Classifier on **Image Pixel**." %}
+{% include skin_cancer %}
 
 <figure class="three">
     <a href="/images/SVM.JPG"><img src="/images/SVM.JPG"></a>
