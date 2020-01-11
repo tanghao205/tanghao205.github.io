@@ -115,6 +115,10 @@ X_optimized = Vec_optimized.toarray()
 
 # CIFAR10 Neural Net Image Classification with PyTorch
 
+<figure>   
+    <a href="/images/cifar10.jpg"><img src="/images/cifar10.jpg"></a>
+</figure>
+
 - Use GPU in Google colab to train the convolutional Neural Net 
 
 # Data Visualization
