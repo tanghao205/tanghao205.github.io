@@ -113,6 +113,9 @@ Vec_optimized = vectorizer_optimized.fit_transform(list(docs['X']))
 X_optimized = Vec_optimized.toarray()
 ```
 
+# CIFAR10 Neural Net Image Classification with PyTorch
+
+- Use GPU in Google colab to train the convolutional Neural Net 
 
 # Data Visualization
 
