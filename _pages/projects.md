@@ -26,7 +26,9 @@ skin_cancer:
 
 # Wine Review Learning and Recomdation
 
-
+<figure>
+    <a href="/images/winemag.JPG"><img src="/images/winemag.JPG"></a>
+</figure>
 
 # Skin Cancer Diagnosis Learning
 
@@ -51,7 +53,7 @@ The second part is to extract visible features from the images after effective i
 - **Decision Tree**
 
 <figure>
-    <a href="/images/ImageProcessing1.jpg"><img src="/images/ImageProcessing1.jpg"></a>
+    <a href="/images/ImageProcessing.jpg"><img src="/images/ImageProcessing.jpg"></a>
 </figure>
 
 
