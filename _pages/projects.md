@@ -32,7 +32,7 @@ skin_cancer:
 <figure>   
     <a href="/images/winemag.jpg"><img src="/images/winemag.jpg"></a>
 </figure>
-[WineEnthusiast Magazine](https://www.winemag.com/)
+[**WineEnthusiast Magazine**](https://www.winemag.com/)
 
 # Skin Cancer Diagnosis Learning
 
