@@ -102,6 +102,16 @@ The second part is to extract visible features from the images after effective i
 
 # Practical Data Cleaning
 
+<figure>   
+    <a href="/images/whatsonthemenu.JPG"><img src="/images/whatsonthemenu.JPG"></a>
+</figure>
+This project is simulating the real data cleaning process.  
+Our data is based on one of famous New York Public Library project which track the dish and menu evolution in NYC since 1900.  
+Cleaning process focus on missing data, informal input or inconsistent format. 
+The post-processed data are used to input SQLite for integrity constraint (IC) check. Very neat scientific workflow is generated to describe the cleaning roadmap in YesWorkflow program.  
+
+[Here is the Report](https://drive.google.com/file/d/1WlkwBezYAV35sIIWqUu__cQTIulCS-Nn/view?usp=sharing)
+
 # Cloud Computing Application
 
 # Advanced Beyesian Modeling
