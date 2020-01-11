@@ -106,9 +106,14 @@ The second part is to extract visible features from the images after effective i
     <a href="/images/whatsonthemenu.JPG"><img src="/images/whatsonthemenu.JPG"></a>
 </figure>
 This project is simulating the real data cleaning process.  
+
 Our data is based on one of famous New York Public Library project which track the dish and menu evolution in NYC since 1900.  
+
 Cleaning process focus on missing data, informal input or inconsistent format. 
-The post-processed data are used to input SQLite for integrity constraint (IC) check. Very neat scientific workflow is generated to describe the cleaning roadmap in YesWorkflow program.  
+
+The post-processed data are used to input SQLite for integrity constraint (IC) check. This processed is coded by python.  
+
+Very neat scientific workflow is generated to describe the cleaning roadmap in YesWorkflow program.  
 
 <figure>   
     <a href="/images/YWF.jpg"><img src="/images/YWF.jpg"></a>
