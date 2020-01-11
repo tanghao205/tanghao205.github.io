@@ -3,10 +3,12 @@ layout: archive
 classes: wide
 permalink: /projects/
 title: "projects"
+
 author_profile: true
 header:
   image: "/images/H3.jpg"	
-
+  
+excerpt: "Minimal Mistakes is a flexible two-column Jekyll theme."
 skin_cancer:
   - image_path: /images/SVM.JPG
     alt: "Support Vector Machine"
