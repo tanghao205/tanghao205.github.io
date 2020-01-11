@@ -111,7 +111,9 @@ Use sklearn to get the BOW vectors:
 vectorizer_optimized = CountVectorizer(stop_words = SW, max_df = 1000, min_df = 2)  ## Instantiate an object, 
 Vec_optimized = vectorizer_optimized.fit_transform(list(docs['X']))
 X_optimized = Vec_optimized.toarray()
-```
+```  
+  
+  
 
 # CIFAR10 Neural Net Image Classification with PyTorch
 
