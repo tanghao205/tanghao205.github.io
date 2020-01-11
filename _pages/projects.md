@@ -102,7 +102,9 @@ The second part is to extract visible features from the images after effective i
 <figure>   
     <a href="/images/whatsonthemenu.JPG"><img src="/images/whatsonthemenu.JPG"></a>
 </figure>
-This project is simulating the real data cleaning process.  
+[**What's on the menu?**](http://menus.nypl.org/about)
+
+This project is real data cleaning process.  
 
 Our data is based on one of famous New York Public Library project which track the dish and menu evolution in NYC since 1900.  
 
