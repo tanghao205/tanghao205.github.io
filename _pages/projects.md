@@ -24,7 +24,10 @@ skin_cancer:
     url: /images/RF1.jpg
 ---
 
-
+  
+   
+   
+   
 
 # Wine Review Learning and Recomdation
 
