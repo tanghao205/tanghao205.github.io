@@ -37,9 +37,6 @@ skin_cancer_2:
 
   
    
-   
-#    
-# 
 # Wine Review Learning and Recomdation
 
 
