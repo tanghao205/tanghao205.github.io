@@ -69,7 +69,7 @@ if __name__ == "__main__":
         print(str(sum(result[0])/len(result[0])/60) + ' minute')
 
 ```
-# Request in spider
+# Request in Spider
 
 ```python
 import requests
