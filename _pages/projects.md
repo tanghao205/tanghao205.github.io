@@ -90,7 +90,28 @@ The second part is to extract visible features from the images after effective i
 
 
 
-# Adversarial Learning
+# Bag-of-Word (BOW) Processing and Doc Search Engine Simulation
+
+- Prepocessing to thousands of yelp reviews, identify the stop words and determine the minimal word occurance for Bag-of-word vector construction.
+- Search certain words with inclination to find the target reviews.
+- Build a logistic classifier based on the training set from all review's BOW vectors/labels
+- The final accuracy on the test set is **97%**
+- Use ROC to verify the classifier in different threshold
+
+Stop Word:
+```python
+SW = ['the', 'an', 'a', 'and', 'or', 'from', 'to', 'in', 'out', 'about', 'am', 'are', 'is', 'was', 'be', 'been', 
+      'I', 'you', 'he', 'she', 'we', 'they', 'this', 'that', 'these', 'those', 'my', 'your', 'his', 'her', 'their', 'our', 
+      'on', 'with', 'without', 'has', 'have', 'had', 'me', 'him', 'her', 'us', 'them', 'it', 'for', 'of', 'at', 'as', 'so', 
+      'because', 'then', 'but', 'although', 'though', 'if', 'already', 'yet', 'here', 'there', 'were', 'would', 'could']
+```  
+Use sklearn to get the BOW vectors:
+```python
+...
+vectorizer_optimized = CountVectorizer(stop_words = SW, max_df = 1000, min_df = 2)  ## Instantiate an object, 
+Vec_optimized = vectorizer_optimized.fit_transform(list(docs['X']))
+X_optimized = Vec_optimized.toarray()
+```
 
 
 # Data Visualization
