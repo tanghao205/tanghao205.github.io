@@ -28,10 +28,10 @@ skin_cancer_2:
     alt: "Logistic Regression"
     title: "Logistic Regression"
     url: /images/LR.jpg
-  - image_path: /images/DT.jpg
+  - image_path: /images/DT.JPG
     alt: "Decision Tree"
     title: "Decision Tree"
-    url: /images/DT.jpg
+    url: /images/DT.JPG
 
 ---
 
