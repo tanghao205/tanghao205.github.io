@@ -16,7 +16,7 @@ skin_cancer:
     alt: "K-Nearest-Neighbor"
     title: "Responsive layouts"
     url: /images/K_means.JPG
-  - image_path: /images/RF1.jpg"
+  - image_path: /images/RF1.jpg
     alt: "100% free"
     title: "Random Forest"
     url: /images/RF1.jpg
