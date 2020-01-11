@@ -1,8 +1,8 @@
 ---
 layout: archive
 classes: wide
-permalink: /projects/
-title: "projects"
+permalink: /ML_NN/
+title: "Machine Learning & Neural Net"
 
 author_profile: true
 header:
