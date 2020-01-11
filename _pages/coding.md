@@ -1,7 +1,7 @@
 ---
 layout: single
 permalink: /coding/
-title: "coding"
+title: " "
 author_profile: true
 header:
   image: "/images/H1.jpg"	
