@@ -4,10 +4,10 @@ main:
     url: /about/
   - title: "Machine Learning"
     url: /ML/
-  - title: "Coding"
-    url: /coding/
   - title: "Cloud Computing"
     url: /CC/
+  - title: "Coding"
+    url: /coding/
   # - title: "About"
   #   url: https://mmistakes.github.io/minimal-mistakes/about/
   # - title: "Sample Posts"
