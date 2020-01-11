@@ -51,7 +51,7 @@ skin_cancer_2:
 Life is data. 
 Here the machine learning is going to tell the wine's story by doing testers' job. 
 
-I used two popular ML models, *Random Forest* and *Boosting* to build the regression model on the wine score with the data from **Winemag**. 
+I used two popular ML models, ***Random Forest*** and ***Boosting*** to build the regression model on the wine score with the data from **Winemag**. 
 
 By recommanding the Pinot Noir from outstanding winery, we can also see testers' preference or inclination.
 
