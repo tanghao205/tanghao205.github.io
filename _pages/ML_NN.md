@@ -1,8 +1,8 @@
 ---
 layout: archive
 classes: wide
-permalink: /ML_NN/
-title: "ML_NN"
+permalink: /projects/
+title: "projects"
 
 author_profile: true
 header:
