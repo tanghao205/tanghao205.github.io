@@ -45,7 +45,7 @@ The first part of the project is to fit three classifiers on the skin cancer ima
 
 
 
-The second part is to extract visible features from the images after effective image processing (applying machine learning in image pocessing), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
+The second part is to extract visible features from the images after effective image processing (*applying knn in skin area recognition*), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
 
 - **Logistic Regression**
 - **Decision Tree**
