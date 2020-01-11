@@ -1,7 +1,7 @@
 ---
 layout: archive
 classes: wide
-permalink: /projects/
+permalink: /ML/
 title: " "
 
 author_profile: true
