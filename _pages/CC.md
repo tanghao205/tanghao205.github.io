@@ -2,7 +2,7 @@
 layout: archive
 classes: wide
 permalink: /CC/
-title: "Cloud Computing"
+title: "CC"
 
 author_profile: true
 header:
