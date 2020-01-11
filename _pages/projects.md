@@ -62,7 +62,7 @@ it is based on detection in the early stage.
 
 This machine learning project is to verify the detection methods according to skin cancer lesion area with different learning models.  
 
-The first part of the project is to fit three classifiers on the skin cancer image, and analyze the prediction result. Below are the learning mothods:   
+The first part of the project is to fit three classifiers on the diagnosis image pixel, and analyze the prediction result after PCA transform. Below are the learning mothods:   
 
 - **K-Nearest-Neighbors**
 - **Support Vector Machine**
