@@ -37,9 +37,9 @@ This machine learning project is to verify the detection methods according to sk
 
 The first part of the project is to fit three classifiers on the skin cancer image, and analyze the prediction result. Below are the learning mothods:   
 
-- K-Nearest-Neighbors
-- Support Vector Machine
-- Random Forest
+- **K-Nearest-Neighbors**
+- **Support Vector Machine**
+- **Random Forest**
 
 {% include gallery id="skin_cancer" layout="three" %}
 
@@ -47,8 +47,8 @@ The first part of the project is to fit three classifiers on the skin cancer ima
 
 The second part is to extract visible features from the images after effective image processing (applying machine learning in image pocessing), then fit classifiers based on our new features, which will be more interpretable to skin cancer diagnosis. Here is the learning methods:
 
-- Logistic Regression
-- Decision Tree
+- **Logistic Regression**
+- **Decision Tree**
 
 <figure>
     <a href="/images/ImageProcessing1.jpg"><img src="/images/ImageProcessing1.jpg"></a>
@@ -59,9 +59,7 @@ The second part is to extract visible features from the images after effective i
 [.rmd file](https://drive.google.com/file/d/1-K-sLj7PdQRG9mV4BfWw3Bt1JSgzy_xZ/view?usp=sharing)
 
 *Normal detection rate from dermatologist is 54%*  
-
 *Models on the 1st section sucessfully detect ~75% skin cancer*.  
-
 *Models on the 2nd section sucessfully detect ~70% skin cancer*.   
 
 
