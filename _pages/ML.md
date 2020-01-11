@@ -2,7 +2,7 @@
 layout: archive
 classes: wide
 permalink: /projects/
-title: "Machine Learning"
+title: " "
 
 author_profile: true
 header:
