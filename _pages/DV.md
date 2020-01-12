@@ -2,6 +2,7 @@
 layout: archive
 permalink: /DV/
 title: " "
+classes: wide
 
 author_profile: true
 header:
