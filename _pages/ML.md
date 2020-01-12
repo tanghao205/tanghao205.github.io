@@ -121,7 +121,8 @@ X_optimized = Vec_optimized.toarray()
     <a href="/images/cifar10.jpg"><img src="/images/cifar10.jpg"></a>
 </figure>
 
-- The dataset is complete CIFAR10 Images set.
+- This job is to tell what's displayed on the popular ML image dataset(CIFAR10). The images are presenting 10 different classes: airplanes, cars, birds, cats, deer, dogs, frogs, horses, ships, and trucks. 
+
 - Use [PyTorch](https://pytorch.org/) to construct the two-layer fully-connected (single hidden layer) model, optimization function and track the loss function. **Final Accuracy: %39.2**  
 <figure>   
     <a href="/images/2layerFC_accuracy.jpg"><img src="/images/2layerFC_accuracy.jpg"></a>
