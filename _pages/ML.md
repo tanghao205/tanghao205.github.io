@@ -155,7 +155,7 @@ The slice are clustered into specific clustering (can be adjusted)
 Train the slice data with cross-validation. 
 
 <figure>   
-    <a href="/images/ADL.jpg"><img src="/ADL.jpg"></a>
+    <a href="/images/ADL.jpg"><img src="/images/ADL.jpg"></a>
 </figure>  
 
 
