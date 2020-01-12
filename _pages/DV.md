@@ -33,3 +33,6 @@ skin_cancer_2:
     url: /images/DT.JPG
 
 ---
+
+
+# Data Visualization
