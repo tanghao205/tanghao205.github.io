@@ -46,6 +46,7 @@ Membership Protocal:
 - It must be able to handle message losses and delay simultaneously.  
 
 Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.  
+  
 | Layer                      | Job                                         |
 | -------------------------- | ------------------------------------------- |
 | Emulated Network | Init peer/member's address. Send and Receive message between peer with order. Shut down the network. |
