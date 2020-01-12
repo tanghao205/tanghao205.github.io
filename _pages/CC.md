@@ -43,13 +43,13 @@ This work presents the overview to storm-event by exploring the official storm-e
 # Membership Protocol and Key-value Store with C++
 ### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
 
-1. Membership Protocal:  
+a). Membership Protocal:  
 
 - In network, **Membership protocol** is to detect peer's join, failure and leave with reliable accuracy.  
 - Each peer received other's status(list) and **gossip** their status(list) to all peers under the protocal. So the whole network will have the updating status communication.  
 - It must be able to handle message **losses** and **delay** simultaneously and log the peer join, leave, failure status. 
 
-2. Fault-tolerant Key-value Store:  
+b). Fault-tolerant Key-value Store:  
 
 - The peers in the network will construct a **load-balancing** hashing ring.
 - The peers network will implement a fault-tolerant **Key-value(KV) store** and sustain it by peer-to-peer(P2P) communication under the membership protocal. The KV record will be stored with **3 replica** (in 3 peers).
