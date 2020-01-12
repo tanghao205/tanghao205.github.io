@@ -145,7 +145,6 @@ X_optimized = Vec_optimized.toarray()
   
 - Apply GPU in (Google colab)[https://colab.research.google.com/notebooks/welcome.ipynb] to train the convolutional Neural Net with input of all tensors. 
 
-# Data Visualization
 
 
 # Practical Data Cleaning
