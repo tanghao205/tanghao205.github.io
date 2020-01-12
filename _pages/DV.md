@@ -5,7 +5,7 @@ title: " "
 
 author_profile: true
 header:
-  image: "/images/H4.jpg"	
+  image: "/images/H6.jpg"	
   
 
 skin_cancer:
