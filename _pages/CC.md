@@ -50,7 +50,7 @@ Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Netw
   
 | Layer                      | Job                                         |
 | -------------------------- | ------------------------------------------- |
-| Emulated Network | Init peer/member's address. Send and Receive message between peer with order.\n Shut down the network. |
+| Emulated Network | Init peer/member's address. Send and Receive message between peer with order. \n Shut down the network. |
 | Application | Run function to Peer start and join to network. Run application to impelment P2P membership protocal and KV store. |
 | Peer-to-peer | Define the membership protocal (methods) and gossip brocasting. Deploy the KV store (Create, Remove, Update, Delete methods) |
 
