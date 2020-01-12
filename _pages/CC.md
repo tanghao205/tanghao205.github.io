@@ -62,7 +62,8 @@ Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Netw
 | 2) Application | Run function to Peer start and join to network. Run application to impelment P2P membership protocal and KV store. |
 | 3) Peer-to-peer | Define the membership protocal (methods) and gossip brocasting. Deploy the KV store |
 
-***TLDR.***
+***TLDR.***  
+
 ***Below is the MP2Node.h file to the P2P layer major function:***
 
 ```c++
