@@ -129,14 +129,14 @@ X_optimized = Vec_optimized.toarray()
 </figure>  
   
   
-- Construct 2-layer CNN with 3x3 filters, activation, pooling, stride, padding and generate classification output from linear function.
+- Construct 2-layer CNN with *3x3 filters*, *activation*, *pooling*, *stride*, *padding* and generate classification output from linear function.
 **Final Accuracy: 53.5%**  
 <figure>   
     <a href="/images/2layerCNN_accuracy.jpg"><img src="/images/2layerCNN_accuracy.jpg"></a>
 </figure>  
   
   
-- Construct ResNet with 3x3 filters, activation, pooling, stride, padding and generate classification output from linear function. The performance is enhanced by decreasing learning rate as epoch increase. 
+- Construct ResNet with *3x3 filters*, *activation*, *pooling*, *stride*, *padding* and generate classification output from linear function. The performance is enhanced by decreasing learning rate as epoch increase. Shortcut input is added to the prevent gradient vanishing in learning.
 **Final Accuracy: 93.2%**  
 <figure>   
     <a href="/images/ResNet_accuracy.jpg"><img src="/images/ResNet_accuracy.jpg"></a>
