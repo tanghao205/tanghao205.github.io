@@ -152,7 +152,7 @@ X_optimized = Vec_optimized.toarray()
     <a href="/images/ADL.jpg"><img src="/images/ADL.jpg"></a>
 </figure>  
 
-This project is trying to detect 14 ADLs from the sensor single. Volunteer wear the sensor on their hand, foot, leg, neck etc. and their body movement will be captured by the sensors. Theorectically similar activities, e.g. Brush Teech, will generate similar signal. However, the singal is recorded with random time window so we don't know which section of the signal is for the specific activities :(. 
+This project is trying to detect 14 ADLs from the sensor single. Volunteer wear the sensor on their hand, foot, leg, neck etc. and their body movement will be captured by the sensors. Theorectically similar activities, e.g. Brush Teech, will generate similar signal. However, the singal is recorded with random time window so we don't know which section of the signal is for the specific activities. :( 
 
 | Index                       | ADL                                      |
 | --------------------------- | ---------------------------------------- |
