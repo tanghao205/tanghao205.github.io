@@ -42,7 +42,7 @@ skin_cancer_2:
 </figure>
 
 - Map-Reduce is traditional computation framework in big data processing. 
-- This work use Map-Reduce to process the storm-event impact in the US.  
+- This work use Map-Reduce framework in **docker container** to process the storm-event impact in the US.  
 - I invested the data and display the storm-event evolution trend as the indicator to climate change.  
 - On the other hand, the computation framework is also evaluated during the data processing. 
 
@@ -212,3 +212,7 @@ public:
 #endif /* MP2NODE_H_ */
 
 ```
+# Other Application
+- AWS EC2 implement
+- HBase
+- Storm
