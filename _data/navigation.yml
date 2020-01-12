@@ -6,6 +6,8 @@ main:
     url: /ML/
   - title: "Cloud Computing"
     url: /CC/
+  - title: "Data Visualization"
+    url: /DV/
   - title: "Coding"
     url: /coding/
   # - title: "About"
