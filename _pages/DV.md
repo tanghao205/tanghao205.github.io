@@ -20,6 +20,7 @@ This project visualize the globle terrorist evolution in Tableau and webpage wit
 <figure>
     <a href="/images/GTD.jpg"><img src="/images/GTD.jpg"></a>
 </figure>  
+[**More detail**](https://drive.google.com/file/d/1Pw_gatZFkeIKEdho3SAPxyv7NG0M_hdD/view?usp=sharing)
 
 ### d3.js page implement in github:
 
