@@ -1,6 +1,7 @@
 ---
 layout: archive
 permalink: /CC/
+classes: wide
 title: " "
 
 author_profile: true
