@@ -115,13 +115,31 @@ X_optimized = Vec_optimized.toarray()
   
   
 
-# CIFAR10 Neural Net Image Classification with PyTorch
+# Convolutional Neural Net (CNN) Image Classification with PyTorch
 
 <figure>   
     <a href="/images/cifar10.jpg"><img src="/images/cifar10.jpg"></a>
 </figure>
 
-- Use GPU in Google colab to train the convolutional Neural Net 
+- The dataset is complete CIFAR10 Images set.
+- Use [PyTorch](https://pytorch.org/) to construct the two-layer fully-connected (single hidden layer) model, optimization function and track the loss function. **Final Accuracy: %39.2**
+<figure>   
+    <a href="/images/2layerFC_accuracy.jpg"><img src="/images/2layerFC_accuracy.jpg"></a>
+    <figcaption>2 layer fully-connected Accuacy.</figcaption>
+</figure>
+- Construct 2-layer CNN with 3x3 filters, activation, pooling, stride, padding and generate classification output from linear function.
+**Final Accuracy: 53.5%**
+<figure>   
+    <a href="/images/2layerCNN_accuracy.jpg"><img src="/images/2layerCNN_accuracy.jpg"></a>
+    <figcaption>2 layer fc CNN Accuacy.</figcaption>
+</figure>
+- Construct ResNet with 3x3 filters, activation, pooling, stride, padding and generate classification output from linear function. The performance is enhanced by decreasing learning rate as epoch increase. 
+**Final Accuracy: 93.2%**
+<figure>   
+    <a href="/images/ResNet_accuracy.jpg"><img src="/images/ResNet_accuracy.jpg"></a>
+    <figcaption>ResNet Accuacy.</figcaption>
+</figure>
+- Apply GPU in (Google colab)[https://colab.research.google.com/notebooks/welcome.ipynb] to train the convolutional Neural Net with input of all tensors. 
 
 # Data Visualization
 
