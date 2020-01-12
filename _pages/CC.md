@@ -38,21 +38,29 @@ skin_cancer_2:
 
 # Membership Protocol and Key-value Store with C++
 
-Membership Protocal:  
+## This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
 
-- In network, Membership protocol is to detect peer's join, failure and leave with reliable accuracy.  
-- Each peer received other's status(list) and broadcasted their status(list) to all peers under the protocal. So the whole network will have the updating status communication.  
-- The network implement Key-value(KV) store and sustain it by peer-to-peer(P2P) communication under the membership protocal. 
-- It must be able to handle message losses and delay simultaneously and log the peer join, leave, failure status. 
-- 
+1. Membership Protocal:  
+
+- In network, **Membership protocol** is to detect peer's join, failure and leave with reliable accuracy.  
+- Each peer received other's status(list) and **gossip** their status(list) to all peers under the protocal. So the whole network will have the updating status communication.  
+- It must be able to handle message **losses** and **delay** simultaneously and log the peer join, leave, failure status. 
+
+2. Fault-tolerant Key-value Store:
+
+- The peers in the network will construct a **load-balancing** hashing ring.
+- The peers network will implement a fault-tolerant **Key-value(KV) store** and sustain it by peer-to-peer(P2P) communication under the membership protocal. The KV record will be stored with **3 replica** (in 3 peers).
+- KV store support Create, Remove, Update, Delete(CRUD) functions.
+- Read and Write are based on **Quorum** consistency to the 3 KV replicas.
+- The consitency is maintained and repaired by **stabilization** mechanism.  
 
 Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.  
   
 | Layer                      | Job                                         |
 | -------------------------- | ------------------------------------------- |
-| Emulated Network | Init peer/member's address. Send and Receive message between peer with order. \n Shut down the network. |
-| Application | Run function to Peer start and join to network. Run application to impelment P2P membership protocal and KV store. |
-| Peer-to-peer | Define the membership protocal (methods) and gossip brocasting. Deploy the KV store (Create, Remove, Update, Delete methods) |
+| 1) Emulated Network | Init peer/member's address. Send and Receive message between peer with order. Shut down the network. |
+| 2) Application | Run function to Peer start and join to network. Run application to impelment P2P membership protocal and KV store. |
+| 3) Peer-to-peer | Define the membership protocal (methods) and gossip brocasting. Deploy the KV store |
 
 
 
