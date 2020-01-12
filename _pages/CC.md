@@ -37,14 +37,28 @@ skin_cancer_2:
 
 # Cloud Computing Application
 
-This work use Map-Reduce to process the storm-event impact in the US.  
-I invested the data and display the storm-event evolution trend as the indicator to climate change.  
-On the other hand, the computation framework is also evaluated during the data processing. 
-
-
 <figure>
     <a href="/images/MR.JPG"><img src="/images/MR.JPG"></a>
 </figure>
+
+- Map-Reduce is traditional computation framework in big data processing. 
+- This work use Map-Reduce to process the storm-event impact in the US.  
+- I invested the data and display the storm-event evolution trend as the indicator to climate change.  
+- On the other hand, the computation framework is also evaluated during the data processing. 
+
+### Here is the storm-event evolution:
+
+<figure>
+    <a href="/images/Storm_event.jpg"><img src="/images/Storm_event.jpg"></a>
+</figure>  
+
+### Below is the (b) CPU processing time and (c) framework processing time (CPU + Frame) in different input size. There exist extra overhead in map-reduce framework:
+
+<figure>
+    <a href="/images/Processing_time.jpg"><img src="/images/Processing_time.jpg"></a>
+</figure>  
+
+
 
 [Report](https://drive.google.com/file/d/1Ll-DVjvoT5jgtDpTFXKdodoYxFH5qcuP/view?usp=sharing)
 
