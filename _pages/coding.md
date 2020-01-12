@@ -1,7 +1,8 @@
 ---
-layout: single
+layout: archive
 permalink: /coding/
 title: " "
+classes: wide
 author_profile: true
 header:
   image: "/images/H1.jpg"	
