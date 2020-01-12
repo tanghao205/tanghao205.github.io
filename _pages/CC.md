@@ -37,9 +37,10 @@ skin_cancer_2:
 
 # Cloud Computing Application
 
-This work use Map-Reduce to process the storm-event impact in the US. 
-I invested the data and display the storm-event evolution trend as the indicator to climate change. 
-On the other hand, the computation framework is also evaluated during the data processing.
+This work use Map-Reduce to process the storm-event impact in the US.  
+I invested the data and display the storm-event evolution trend as the indicator to climate change.  
+On the other hand, the computation framework is also evaluated during the data processing. 
+
 
 <figure>
     <a href="/images/MR.JPG"><img src="/images/MR.JPG"></a>
