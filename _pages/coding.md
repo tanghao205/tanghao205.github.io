@@ -5,7 +5,7 @@ title: " "
 classes: wide
 author_profile: true
 header:
-  image: "/images/H1.jpg"	
+  image: "/images/H0.jpg"	
 
 ---
                      
