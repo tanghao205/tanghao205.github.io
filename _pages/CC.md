@@ -37,7 +37,7 @@ skin_cancer_2:
 # Cloud Computing Application
 
 # Membership Protocol and Key-value Store with C++
-### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
+#### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
 
 1. Membership Protocal:  
 
