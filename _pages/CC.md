@@ -38,4 +38,12 @@ skin_cancer_2:
 
 # Membership Protocol with C++
 
-Here there are 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.
+Membership Protocal:  
+
+- In network, Membership protocol is to detect node's join, failure and leave with reliable accuracy.  
+
+- Each node received other's status(list) and broadcasted their status(list) to all nodes under the protocal. So the whole network will have the updating status communication.  
+  
+- It must be able to handle message losses and delay simultaneously.  
+
+Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.
