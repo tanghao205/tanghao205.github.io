@@ -36,4 +36,6 @@ skin_cancer_2:
 
 # Cloud Computing Application
 
-# Gossip System
+# Membership Protocol with C++
+
+Here there are 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.
