@@ -43,13 +43,18 @@ Membership Protocal:
 - In network, Membership protocol is to detect peer's join, failure and leave with reliable accuracy.  
 - Each peer received other's status(list) and broadcasted their status(list) to all peers under the protocal. So the whole network will have the updating status communication.  
 - The network implement Key-value(KV) store and sustain it by peer-to-peer(P2P) communication under the membership protocal. 
-- It must be able to handle message losses and delay simultaneously.  
+- It must be able to handle message losses and delay simultaneously and log the peer join, leave, failure status. 
+- 
 
 Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Network Layer.  
   
 | Layer                      | Job                                         |
 | -------------------------- | ------------------------------------------- |
-| Emulated Network | Init peer/member's address. Send and Receive message between peer with order. Shut down the network. |
-| Application | Run function to Peer start and join to network. Run application to impelment P2P membership protocal and KV store. |
-| Peer-to-peer | Define the membership protocal and gossip brocasting. Deploy the KV store (Create, Remove, Update, Delete methods) |
+| Emulated Network | Init peer/member's address. Send and Receive message between peer with order. 
+Shut down the network. |
+| Application | Run function to Peer start and join to network. 
+Run application to impelment P2P membership protocal and KV store. |
+| Peer-to-peer | Define the membership protocal (methods) and gossip brocasting. Deploy the KV store (Create, Remove, Update, Delete methods) |
+
+
 
