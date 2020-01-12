@@ -148,15 +148,35 @@ X_optimized = Vec_optimized.toarray()
 
 # Activities of Daily Living (ADL) Classification with Vector Quantization
 
-This project is trying to detect ADL from the sensor single. Volunteer wear the sensor on their hand, foot, leg, neck etc. and their body movement will be captured by the sensors. Theorectically similar activities, e.g. Brush Teech, will generate similar signal. However, the singal is recorded with random time window so we don't know which section of the signal is for the specific activities :tired_face:.  
-
-So, I used vector quantization, slice the whole signal into different length of piece with different overlap setting. 
-The slice are clustered into specific clustering (can be adjusted)
-Train the slice data with cross-validation. 
-
 <figure>   
     <a href="/images/ADL.jpg"><img src="/images/ADL.jpg"></a>
 </figure>  
+
+This project is trying to detect 14 ADLs from the sensor single. Volunteer wear the sensor on their hand, foot, leg, neck etc. and their body movement will be captured by the sensors. Theorectically similar activities, e.g. Brush Teech, will generate similar signal. However, the singal is recorded with random time window so we don't know which section of the signal is for the specific activities :(. 
+
+| Index                       | ADL                                      |
+| --------------------------- | ---------------------------------------- |
+| 1 | Brush Teeth |
+| 2 | Climb Stairs |
+| 3 | Comb Hair |
+| 4 | Descend Stairs |
+| 5 | Drink Glass of Water |
+| 6 | Eat Meat |
+| 7 | Eat Soup |
+| 8 | Get Up from Bed |
+| 9 | Lie Down |
+| 10 | Pour Water |
+| 11 | Sit Down Chair |
+| 12 | Stand Up Chair |
+| 13 | Use Telephone |
+| 14 | Wlak |
+
+So, I used vector quantization, slice the whole signal into different length of piece with different overlap setting. 
+The slice are clustered into specific cluster and there will be pattern of the slice in these clustering. The classifier is trained based on the pattern. The training process apply cross-validation. 
+   
+By adjusting the slice length, overlap, clustering quantity, the classifier can learn the vector slice pattern and improve the precision.
+
+This method is powerful when we want to monitor any signal or signal-related activities. 
 
 
 # Practical Data Cleaning
