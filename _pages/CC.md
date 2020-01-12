@@ -41,7 +41,7 @@ This work presents the overview to storm-event by exploring the official storm-e
 [Report](https://drive.google.com/file/d/1Ll-DVjvoT5jgtDpTFXKdodoYxFH5qcuP/view?usp=sharing)
 
 # Membership Protocol and Key-value Store with C++
-#### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
+### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
 
 1. Membership Protocal:  
 
