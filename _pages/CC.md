@@ -37,7 +37,13 @@ skin_cancer_2:
 
 # Cloud Computing Application
 
-This work presents the overview to storm-event by exploring the official storm-event dataset. Investigation is processed to display the storm-event evolution trend as the indicator to climate change. Mining to the dataset provides the reference idea focus on hurricane affected areas. This paper also employs statistical methods to the causality between storm-event damage and area product growth. The underneath computation framework performance is evaluated in the project as the basis of other analysis.
+This work use Map-Reduce to process the storm-event impact in the US. 
+I invested the data and display the storm-event evolution trend as the indicator to climate change. 
+On the other hand, the computation framework is also evaluated during the data processing.
+
+<figure>
+    <a href="/images/MR.JPG"><img src="/images/MR.JPG"></a>
+</figure>
 
 [Report](https://drive.google.com/file/d/1Ll-DVjvoT5jgtDpTFXKdodoYxFH5qcuP/view?usp=sharing)
 
