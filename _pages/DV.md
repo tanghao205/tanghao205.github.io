@@ -22,4 +22,4 @@ This project visualize the globle terrorist evolution in Tableau and webpage wit
 
 ### d3.js page implement in github:
 
-[**GTD webpsge**](https://tanghao205.github.io/GTD.DataVisialization/)
+[**GTD webpsge (Chrome version)**](https://tanghao205.github.io/GTD.DataVisialization/)
