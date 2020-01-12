@@ -169,7 +169,7 @@ This project is trying to detect 14 ADLs from the sensor single. Volunteer wear 
 | 11 | Sit Down Chair |
 | 12 | Stand Up Chair |
 | 13 | Use Telephone |
-| 14 | Wlak |
+| 14 | Walk |
 
 So, I used vector quantization, slice the whole signal into different length of piece with different overlap setting. 
 The slice are clustered into specific cluster and there will be pattern of the slice in these clustering. The classifier is trained based on the pattern. The training process apply cross-validation. 
