@@ -63,7 +63,7 @@ Here is protocol's 3-layer stucture: Application, Peer-to-Peer and Emulated Netw
 
 ***TLDR.***  
 
-***Below is the MP2Node.h file to the P2P layer major function:***
+***Below is the head file to the P2P layer major function declaration:***
 
 ```c++
 /**********************************
