@@ -77,6 +77,7 @@ The second part is to extract visible features from the images after effective i
 
 <figure>
     <a href="/images/ImageProcessing.jpg"><img src="/images/ImageProcessing.jpg"></a>
+    <figcaption>Area Capture.</figcaption>
 </figure>
 
 {% include gallery id="skin_cancer_2" layout="half" %}
