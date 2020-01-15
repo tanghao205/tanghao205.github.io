@@ -409,3 +409,180 @@ else output p1.sample3;
 run;
 ```
 
+# Risk Management and Basel on SAS
+```sas
+libname p2 "/folders/myfolders/Dataset"; /* Dataset from last SAS section */
+
+options fmterr mprint mlogic symbolgen;
+
+/***********************1**********************/
+
+proc freq data=p2.customer_account nlevels;
+table cust_id / nocum nopercent;
+run;
+
+proc freq data=p2.delinquency_buckets nlevels;
+table cust_id / nocum nopercent;
+run;
+
+proc sort data=p2.delinquency_buckets
+out=p2.delinquency_buckets1;
+by acct_id month;
+run;
+
+
+data p2.delinquency_buckets_rr (drop=dpd30_lag dpd60_lag dpd90_lag dpd120_lag dpd150_lag);
+  set p2.delinquency_buckets;
+  by acct_id month;
+ curr_bal_lag=lag(curr_bal);
+ dpd30_lag=lag(dpd30);
+ dpd60_lag=lag(dpd60);
+ dpd90_lag=lag(dpd90);
+ dpd120_lag=lag(dpd120);
+ dpd150_lag=lag(dpd150);
+  if first.acct_id then do;
+  RR_0_30=DPD30/(100+DPD30);
+  RR_30_60= .;
+  RR_60_90= .;
+  RR_90_120= .;
+  RR_120_150= .;
+  RR_150_180= .;
+  end;
+  else do;
+  RR_0_30=dpd30/curr_bal_lag;
+  RR_30_60=dpd60/dpd30_lag;
+  RR_60_90=dpd90/dpd60_lag;
+  RR_90_120=dpd120/dpd90_lag;
+  RR_120_150=dpd150/dpd120_lag;
+  RR_150_180=dpd180/dpd150_lag;
+  end;
+run;
+
+proc sql;
+create table p2.task1 as
+select
+  acct_id,
+  study_start, 
+  study_end, 
+  curr_bal, 
+  month,
+  dpd30, 
+  rr_0_30, 
+  dpd60, 
+  rr_30_60, 
+  dpd90, 
+  rr_60_90, 
+  dpd120, 
+  rr_90_120, 
+  dpd150, 
+  rr_120_150, 
+  dpd180, 
+  rr_150_180,
+  Month_In_Study,
+  status
+from p2.delinquency_buckets_rr;
+quit;
+
+/***********************2**********************/
+
+
+data p2.task2 (drop=RR_0_30_lag RR_30_60_lag RR_60_90_lag RR_90_120_lag RR_120_150_lag RR_150_180_lag RR_0_30_lag2 RR_30_60_lag2 RR_60_90_lag2 RR_90_120_lag2 RR_120_150_lag2 RR_150_180_lag2);
+  set p2.task1;
+  by acct_id month; 
+  RR_0_30_lag=lag(RR_0_30);
+  RR_30_60_lag=lag(RR_30_60);
+  RR_60_90_lag=lag(RR_60_90);
+  RR_90_120_lag=lag(RR_90_120);
+  RR_120_150_lag=lag(RR_120_150);
+  RR_150_180_lag=lag(RR_150_180);
+  RR_0_30_lag2=lag2(RR_0_30);
+  RR_30_60_lag2=lag2(RR_30_60);
+  RR_60_90_lag2=lag2(RR_60_90);
+  RR_90_120_lag2=lag2(RR_90_120);
+  RR_120_150_lag2=lag2(RR_120_150);
+  RR_150_180_lag2=lag2(RR_150_180);
+  if last.acct_id;
+  if month=2 then do;
+      RR_0_30=sum(RR_0_30,RR_0_30_lag)/2;
+      RR_30_60=sum(RR_30_60,RR_30_60_lag)/2;
+      RR_60_90=sum(RR_60_90,RR_60_90_lag)/2;
+      RR_90_120=sum(RR_90_120,RR_90_120_lag)/2;
+      RR_120_150=sum(RR_120_150,RR_120_150_lag)/2;
+      RR_150_180=sum(RR_150_180,RR_150_180_lag)/2;
+  end;
+  if month>=3 then do;
+      RR_0_30=sum(RR_0_30,RR_0_30_lag,RR_0_30_lag2)/3;
+      RR_30_60=sum(RR_30_60,RR_30_60_lag,RR_30_60_lag2)/3;
+      RR_60_90=sum(RR_60_90,RR_60_90_lag,RR_60_90_lag2)/3;
+      RR_90_120=sum(RR_90_120,RR_90_120_lag,RR_90_120_lag2)/3;
+      RR_120_150=sum(RR_120_150,RR_120_150_lag,RR_120_150_lag2)/3;
+      RR_150_180=sum(RR_150_180,RR_150_180_lag,RR_150_180_lag2)/3;
+  end;
+  output; 
+run;
+  
+/***********************3**********************/
+  
+data p2.pre_task3 (drop=RR_0_30_lag RR_30_60_lag RR_60_90_lag RR_90_120_lag RR_120_150_lag RR_150_180_lag RR_0_30_lag2 RR_30_60_lag2 RR_60_90_lag2 RR_90_120_lag2 RR_120_150_lag2 RR_150_180_lag2);
+  set p2.task1;
+  by acct_id month; 
+  RR_0_30_lag=lag(RR_0_30);
+  RR_30_60_lag=lag(RR_30_60);
+  RR_60_90_lag=lag(RR_60_90);
+  RR_90_120_lag=lag(RR_90_120);
+  RR_120_150_lag=lag(RR_120_150);
+  RR_150_180_lag=lag(RR_150_180);
+  RR_0_30_lag2=lag2(RR_0_30);
+  RR_30_60_lag2=lag2(RR_30_60);
+  RR_60_90_lag2=lag2(RR_60_90);
+  RR_90_120_lag2=lag2(RR_90_120);
+  RR_120_150_lag2=lag2(RR_120_150);
+  RR_150_180_lag2=lag2(RR_150_180);
+  if first.acct_id then do;
+     retain Charge_off 0; 
+     if status="CHARGE-OFF" then Charge_Off=1;
+     else Charge_Off=0;
+  end;
+  if status="CHARGE-OFF" then Charge_Off=1;  
+  if last.acct_id;
+  if month=2 then do;
+      RR_0_30=sum(RR_0_30,RR_0_30_lag)/2;
+      RR_30_60=sum(RR_30_60,RR_30_60_lag)/2;
+      RR_60_90=sum(RR_60_90,RR_60_90_lag)/2;
+      RR_90_120=sum(RR_90_120,RR_90_120_lag)/2;
+      RR_120_150=sum(RR_120_150,RR_120_150_lag)/2;
+      RR_150_180=sum(RR_150_180,RR_150_180_lag)/2;
+  end;
+  if month>=3 then do;
+      RR_0_30=sum(RR_0_30,RR_0_30_lag,RR_0_30_lag2)/3;
+      RR_30_60=sum(RR_30_60,RR_30_60_lag,RR_30_60_lag2)/3;
+      RR_60_90=sum(RR_60_90,RR_60_90_lag,RR_60_90_lag2)/3;
+      RR_90_120=sum(RR_90_120,RR_90_120_lag,RR_90_120_lag2)/3;
+      RR_120_150=sum(RR_120_150,RR_120_150_lag,RR_120_150_lag2)/3;
+      RR_150_180=sum(RR_150_180,RR_150_180_lag,RR_150_180_lag2)/3;
+  end;
+  output; 
+run;
+
+proc sql;
+create table p2.task3 as
+select * 
+from p2.pre_task3 as t3,
+     p1.task1 as t1,
+     p2.customer_account as c
+where t3.acct_id=c.acct_id and 
+      c.cust_id=t1.cust_id;
+quit;
+
+/*all dataset no duplicated acct_id*/
+
+/***********************4**********************/
+
+data p2.task4;
+  set p2.task3;
+  IF charge_off=1 then Time_To_Event=month_in_study+month-1;
+  else Time_To_Event=15;
+run;
+
+```
+
