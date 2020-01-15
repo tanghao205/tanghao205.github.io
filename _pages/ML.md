@@ -1,8 +1,9 @@
 ---
-layout: archive
+layout: single
 classes: wide
 permalink: /ML/
 title: " "
+toc: true
 
 author_profile: true
 header:
