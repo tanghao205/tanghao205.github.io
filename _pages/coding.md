@@ -6,6 +6,7 @@ classes: wide
 author_profile: true
 header:
   image: "/images/H0.jpg"	
+toc: true
 
 ---
                      
