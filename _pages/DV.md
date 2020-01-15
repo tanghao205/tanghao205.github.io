@@ -1,8 +1,9 @@
 ---
-layout: archive
+layout: single
 permalink: /DV/
 title: " "
 classes: wide
+toc: true
 
 author_profile: true
 header:
