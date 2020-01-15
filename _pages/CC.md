@@ -22,13 +22,13 @@ header:
 - I invested the data and display the storm-event evolution trend as the indicator to climate change.  
 - On the other hand, the computation framework is also evaluated during the data processing. 
 
-### Here is the storm-event evolution:
+***Here is the storm-event evolution:***
 
 <figure>
     <a href="/images/Storm_event.jpg"><img src="/images/Storm_event.jpg"></a>
 </figure>  
 
-### Below is the (b) CPU processing time and (c) framework processing time (CPU + Frame) in different input size. There exist extra overhead in map-reduce framework:
+***Below is the (b) CPU processing time and (c) framework processing time (CPU + Frame) in different input size. There exist extra overhead in map-reduce framework:***
 
 <figure>
     <a href="/images/Processing_time.jpg"><img src="/images/Processing_time.jpg"></a>
@@ -39,7 +39,8 @@ header:
 [Report](https://drive.google.com/file/d/1Ll-DVjvoT5jgtDpTFXKdodoYxFH5qcuP/view?usp=sharing)
 
 # Membership Protocol and Key-value Store with C++
-### This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.
+
+***This job is to create membership protocal to the peers in the network and implement fault-tolerant Key-value store on top of this.***
 
 a) Membership Protocal:  
 
