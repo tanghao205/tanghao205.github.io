@@ -114,7 +114,7 @@ libname test odbc user=financial password=financial dsn=financial;
 ods html;
 ods listing;
 
-libname p1 "/folders/myfolders/Project1";
+libname p1 "/folders/myfolders/CustomerData";  /* Load Data Folder */
 
 /* Option */
 
