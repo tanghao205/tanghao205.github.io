@@ -104,7 +104,7 @@ if __name__ == '__main__':
     tieba_spider.run()
 ```
 
-# Customer Segmentation and Data Cleansing on SAS
+# Data Cleansing and Customer Segmentation on SAS
 
 ```sas
 libname test odbc user=financial password=financial dsn=financial; 
