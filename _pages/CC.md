@@ -1,8 +1,9 @@
 ---
-layout: archive
+layout: single
 permalink: /CC/
 classes: wide
 title: " "
+toc: true
 
 author_profile: true
 header:
