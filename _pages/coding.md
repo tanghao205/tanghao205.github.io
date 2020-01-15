@@ -104,8 +104,308 @@ if __name__ == '__main__':
     tieba_spider.run()
 ```
 
+# Customer Segmentation and Data Cleansing on SAS
+
 ```sas
-proc means data=sashelp.class;
+libname test odbc user=financial password=financial dsn=financial; 
+
+/******************* 1 ***********************/
+
+ods html;
+ods listing;
+
+libname p1 "/folders/myfolders/Project1";
+
+/* Option */
+
+option fmtsearch=(p1.myfmts,work.formats);
+options fmterr;
+option symbolgen mlogic mprint;
+
+/***************homephone and ssn cleansing macro*******************/
+%macro cleansing(type);
+   %if &type=homephone %then %do;
+    phcheck=prxparse('/\(\d{3}\)\d{3}-\d{4}/');
+    if homephone eq " " then put _n_"is blank";
+    else if prxmatch(phcheck,homephone)=0 then do;
+    put _n_ homephone "is updated";
+    s=strip(compress(homephone,"()- "));
+    ss="(" || substr(s,1,3)|| ")" || substr(s,4,3) || "-" || substr(s,7,4);  
+    homephone=ss;
+    put homephone;
+    end;
+    drop s ss phcheck;
+   %end;
+   %else %if &type=ssn %then %do;
+    ssncheck=prxparse('/\d{3}-\d{2}-\d{4}/');
+    if ssn eq " " then put _n_"is blank";
+    else if prxmatch(ssncheck,ssn)=0 then do;
+    put _n_ ssn "will be updated";
+    s=strip(compress(ssn,"- ()"));
+    ss=substr(s,1,3)|| "-" || substr(s,4,2) || "-" || substr(s,6,4);  
+    ssn=ss;
+    put ssn;
+    end;
+    drop s ss ssncheck;
+   %end;
+%mend;
+
+/*clean homephone and ssn for data sets:
+customer
+demograph
+fico_score
+credit_history
+address*/
+
+data p1.customer_clean;
+set p1.customer;
+%cleansing(ssn);
+last_update_dt=datetime();
+run;
+data p1.demograph_clean;
+set p1.demograph;
+%cleansing(ssn);
+last_update_dt=datetime();
+run;
+data p1.fico_score_clean;
+set p1.fico_score;
+%cleansing(ssn);
+last_update_dt=datetime();
+run;
+data p1.credit_history_clean;
+set p1.credit_history;
+%cleansing(ssn);
+run;
+data p1.address_clean;
+set p1.address;
+%cleansing(ssn);
+%cleansing(homephone);
+last_update_dt=datetime();
+run;
+
+/* Scrubbing to customer_clean (Customer), demograph_clean(Demograph) fico_score_clean(fico_score) 
+and address_clean(address)*/
+
+proc sort data=p1.customer_clean;
+by ssn descending last_update_dt;run;
+proc sort data=p1.customer_clean nodupkey;
+by ssn;run;
+
+proc sort data=p1.demograph_clean;
+by ssn descending last_update_dt;run;
+/* proc print data=p1.demograph_clean; */
+/* where ssn="764-84-6035" or */
+/*       ssn="764-85-6402" or */
+/*       ssn="415-66-1212"; */
+/* run; 
+ there are two suspecious records for "415-66-1212" whose format is corrected*/
+proc sort data=p1.demograph_clean nodupkey;
+by ssn;run;
+
+proc sort data=p1.fico_score_clean;
+by ssn descending last_update_dt;run;
+proc sort data=p1.fico_score_clean nodupkey;
+by ssn;run;
+
+proc sort data=p1.address_clean;
+by ssn descending last_update_dt;run;
+proc sort data=p1.address_clean nodupkey;
+by ssn;run;
+
+/* DATA CLEANSING */
+/* USE Proc univariate and freq check data status, there is no abnormal data to
+   credit_history,customer and fico_score datasets*/
+
+/* Check Demograph Age/Gender/Nbrchildren/Haschildren and other variables */
+
+proc univariate data=p1.demograph_clean;
+var birthdate;
+run;
+proc freq data=p1.demograph_clean1;
+table gender;
+run;
+proc freq data=p1.demograph_clean1;
+table Nbrchildren Haschildren;
+run;
+
+/* Clean Demograph data */
+data p1.demograph_clean1;
+  set p1.demograph_clean;
+if birthdate<-60000 then birthdate=birthdate+365.25*200;
+if gender="f" or gender="x" then gender = "Female";
+if gender="m" or gender="y" then gender = "Male";
+if Nbrchildren=. then Nbrchildren=0;
+if haschildren=. then haschildren=0;
+last_update_dt=datetime();
+run;
+
+/*Check Missing Address:no missing address */
+
+proc freq data=p1.address_clean nlevels;
+table state / nocum nopercent;
+run;
+
+/*Check Missing State/city: All value-missing observations
+  have state value as DE and city as Oxford*/
+proc print data=p1.address_clean;
+where state=" ";
+run;
+
+proc print data=p1.address_clean;
+where city=" ";
+run;
+
+data p1.address_clean1;
+  set p1.address_clean;
+  if state=" " then state="DE";
+  if city=" " then city="Oxford";
+  Last_Update_DT=datetime();
+run;
+
+/* creat format for fico_range */
+proc format library=p1.MyFmts;
+value fico_range  . = "Null or Zero"
+                  1-630 = "<630"
+                  630-649 = "630-649"
+                  650-669 = "650-669"
+                  670-689 = "670-689"
+                  690-709 = "690-709"
+                  710-729 = "710-729"
+                  730-749 = "730-749"
+                  750-769 = "750-769"
+                  770-789 = "770-789"
+                  790-809 = "790-809"
+                  810-high = "810+";
+run;  
+
+/*proc sql*/
+
+proc sql;
+create table p1.pre_task as
+select c.cust_id,
+       c.ssn,
+       d.birthdate,
+       (today()-d.birthdate)/365.25 as Age format=3.,
+       d.gender,
+       d.maritalstatus,
+       s.fico_score,
+       s.fico_score as fico_range format=fico_range.,
+       d.homeowner,
+       d.hasloan,
+       d.hasaccounts,
+       h.defaulttype,
+       d.nbraccounts,
+       d.balancesum,
+       d.loanbal,
+       d.savingsaccount,
+       d.currjob,
+       d.hhincome,
+       d.HasChildren,
+       d.NbrChildren,
+       d.HasInvest,
+       d.FundsBal
+from p1.customer_clean as c,
+     p1.demograph_clean1 as d,
+     p1.fico_score_clean as s,
+     p1.credit_history_clean as h
+where c.ssn=d.ssn and
+      d.ssn=s.ssn and
+      s.ssn=h.ssn;
+quit;
+
+proc sort data=p1.pre_task;
+   by ssn descending defaulttype;
+run;
+
+data p1.pre_task1 (drop=defaulttype);
+   set p1.pre_task;
+  by cust_id descending defaulttype;
+  if first.defaulttype then do;
+     NbrDefault=0;
+  end;
+  NbrDefault+1;
+  if last.cust_id;
+run;
+
+proc sort data=p1.address_clean1;
+by ssn;
+run;
+
+data p1.task1;
+  merge p1.address_clean1(in=a drop=state city address zip)
+        p1.pre_task1(in=b);
+  by ssn;  
+  if b=1; 
+  if a=0 then HasAddr=0;
+  else HasAddr=1;
+  if homephone=" " then HasPhone=0;
+  else HasPhone=1;
+  last_update_dt=datetime();
+run;
+
+/******************* 2 ***********************/
+
+/* Generate pre_task2 with column segment_cd from task1 */
+data p1.pre_task2;
+  merge p1.address_clean1(in=a)
+        p1.pre_task1(in=b);
+  by ssn;  
+  if b=1; 
+  if a=0 then HasAddr=0;
+  else HasAddr=1;
+  if homephone=" " then HasPhone=0;
+  else HasPhone=1;
+  last_update_dt=datetime();
+ if fico_score>=810 AND 30<Age<40 AND NbrDefault<=2 then Segment_cd="A001";
+ if 710<=fico_score<810 AND 30<Age<40 AND NbrDefault<=2 then Segment_cd="A002";
+ if 690<=fico_score<710 AND 30<Age<40 AND NbrDefault<=2 then Segment_cd="B001";
+ if 650<=fico_score<690 AND 30<Age<40 AND NbrDefault<=2	then Segment_cd="B002";
+run;
+
+/* Generate campaign mapping matrix table p1.offer*/
+proc sql;
+create table p1.Offer as
+select s.segment_cd,
+       s.segment_desc,
+       c.prod_cd,
+       p.prod_desc
+from p1.segment as s,
+     p1.campaign_matrix as c,
+     p1.product as p
+where s.segment_cd=c.segment_cd and
+      c.prod_cd=p.prod_cd;
+quit;
+
+
+/* Sort and Merge */
+proc sort data=p1.pre_task2;
+by descending segment_cd;
+run;
+proc sort data=p1.offer;
+by descending segment_cd;
+run;
+
+data p1.task2;
+  merge p1.pre_task2 (in=a)
+        p1.offer (in=b); 
+  by descending segment_cd;
+  if a=1 and b=1;
+  last_update_dt=datetime();
+run;
+
+/* Split ramdomly to 3 data sets with 33.3% observations */
+data p1.samp;
+   set p1.task2;
+   random=ranuni(0);
+run;
+proc sort data=p1.samp;
+by random;
+run; 
+data p1.sample1 p1.sample2 p1.sample3;
+  set p1.samp (drop=random);
+if mod(_n_,3)=0 then output p1.sample1;
+else if mod(_n_,3)=1 then output p1.sample2;
+else output p1.sample3;
 run;
 ```
 
