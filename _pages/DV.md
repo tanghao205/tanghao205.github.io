@@ -16,7 +16,7 @@ header:
 
 This project visualize the globle terrorist evolution in Tableau and webpage with d3.js on most of the visualize elements.
 
-***Tableau Implement:***
+***Tableau Implement:*** 
 
 <figure>
     <a href="/images/GTD.jpg"><img src="/images/GTD.jpg"></a>
