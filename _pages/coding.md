@@ -413,7 +413,7 @@ run;
 
 Basel II is an international business standard that requires financial institutions to maintain enough cash reserves to cover risks incurred by operations. The Basel accords are a series of recommendations on banking laws and regulations issued by the Basel Committee on Banking Supervision (BSBS). The name for the accords is derived from Basel, Switzerland, where the committee that maintains the accords meets.
 
-[Basel II]https://en.wikipedia.org/wiki/Basel_II
+[Basel II](https://en.wikipedia.org/wiki/Basel_II)
 
 ```sas
 libname p2 "/folders/myfolders/Dataset"; /* Dataset from last SAS section */
