@@ -105,6 +105,7 @@ if __name__ == '__main__':
 ```
 
 ```sas
-proc dts
+proc means data=sashelp.class;
+run;
 ```
 
