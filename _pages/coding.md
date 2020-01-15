@@ -416,7 +416,7 @@ Basel II is an international business standard that requires financial instituti
 [Basel II](https://en.wikipedia.org/wiki/Basel_II)
 
 ```sas
-libname p2 "/folders/myfolders/Dataset"; /* Dataset from last SAS section */
+libname p2 "/folders/myfolders/Roll_rate_folder"; 
 
 options fmterr mprint mlogic symbolgen;
 
@@ -573,7 +573,7 @@ proc sql;
 create table p2.task3 as
 select * 
 from p2.pre_task3 as t3,
-     p1.task1 as t1,
+     p1.task1 as t1, /* p1 is the section 1 on the last SAS project */
      p2.customer_account as c
 where t3.acct_id=c.acct_id and 
       c.cust_id=t1.cust_id;
