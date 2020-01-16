@@ -12,6 +12,9 @@ This is the page to the productive projects I did previously during computer sci
 
 
 My coursework:
-[CS 598: Practical Statistical Learning](https://www.coursera.org/account/accomplishments/certificate/33DRLUWWTJHY?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)
-[CS 513: Theory and Practice of Data Cleaning](https://www.coursera.org/account/accomplishments/certificate/7XN6E7W5LAPC?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)
-[CS 425: Distributed Systems](https://www.coursera.org/account/accomplishments/certificate/G3ZZ5VYUC8N6?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)
+[CS 598: Practical Statistical Learning](https://www.coursera.org/account/accomplishments/certificate/33DRLUWWTJHY?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
+
+[CS 513: Theory and Practice of Data Cleaning](https://www.coursera.org/account/accomplishments/certificate/7XN6E7W5LAPC?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
+
+[CS 425: Distributed Systems](https://www.coursera.org/account/accomplishments/certificate/G3ZZ5VYUC8N6?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
+
