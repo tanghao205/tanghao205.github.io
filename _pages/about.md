@@ -21,6 +21,6 @@ My coursework:
 [CS 498: Cloud Computing Applications](https://www.coursera.org/account/accomplishments/certificate/Y7ATZCJYREUH?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
 [CS 412: Introduction to Data Mining](https://www.coursera.org/account/accomplishments/certificate/X32Y7Y8RKFS5?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
 [CS 498: Data Visualization](https://www.coursera.org/account/accomplishments/certificate/4JD9QV4M2JGM?utm_medium=certificate&utm_source=link&utm_campaign=copybutton_certificate&utm_term=long)  
-CS598: Advanced Bayesian Modeling  
+CS 598: Advanced Bayesian Modeling  
   
 This site is Android/iOS friendly.
