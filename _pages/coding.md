@@ -72,7 +72,7 @@ class fileCheck:
             
     
 if __name__ == "__main__":
-    fc = fileCheck('Y:\\DaviLotDatas\\10G_250_Tray02\\Data', 50)
+    fc = fileCheck('Y:\\Data', 50)
     file_list = fc.sample_file()
     result = fc.get_time(file_list)
     print(len(fc.get_time(file_list)[0]))
