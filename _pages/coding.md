@@ -111,7 +111,7 @@ class TiebaSpider:
             page_num = url_list.index(url) + 1
             self.save_html(html_str, page_num)
 if __name__ == '__main__':
-    tieba_spider = TiebaSpider("李毅")
+    tieba_spider = TiebaSpider("xxx")
     tieba_spider.run()
 ```
 
