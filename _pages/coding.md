@@ -20,7 +20,7 @@ toc: true
   gtag('config', 'UA-156453592-1');
 </script>
                      
-# Production Cycle Time Estimate  
+# Cycle Time Estimate  
 
 ```python
 import os
