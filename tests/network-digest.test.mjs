@@ -36,7 +36,6 @@ const visitRequest = () =>
     },
     body: JSON.stringify({
       session: "f0000000-0000-4000-8000-000000000000",
-      token: "test",
     }),
   });
 const digestRequest = () =>
@@ -221,21 +220,40 @@ test("private network records, visit deduplication, retention and digest snapsho
     assert.deepEqual(retry.snapshot, run.snapshot);
     await db.query("select public.finish_weekly_digest($1,'provider-id')", [start]);
     assert.equal((await prepare()).rows[0].run.status, "sent");
+    for (let i = 0; i < 20; i++) {
+      const result = await db.query(
+        "select public.record_visitor_visit(gen_random_uuid(),repeat('d',64)) as id",
+      );
+      assert(result.rows[0].id);
+    }
+    assert.equal(
+      (
+        await db.query(
+          "select public.record_visitor_visit(gen_random_uuid(),repeat('d',64)) as id",
+        )
+      ).rows[0].id,
+      null,
+    );
+    await db.query(
+      "update public.message_rate_buckets set count=500 where key='visit:global'",
+    );
+    assert.equal(
+      (
+        await db.query(
+          "select public.record_visitor_visit(gen_random_uuid(),repeat('e',64)) as id",
+        )
+      ).rows[0].id,
+      null,
+    );
   } finally {
     await db.close();
   }
 });
 
-test("visit verification precedes storage and geolocation; failures cannot lose accepted visits", async () => {
+test("automatic visits validate origin and session before storage; location failure does not lose visits", async () => {
   const calls = [];
   const handler = createVisitHandler(env, async (url, options) => {
     calls.push(url);
-    if (url.includes("siteverify"))
-      return Response.json({
-        success: true,
-        hostname: "tanghao205.github.io",
-        action: "portfolio-visit",
-      });
     if (url.includes("record_visitor_visit"))
       return Response.json("f0000000-0000-4000-8000-000000000000");
     if (url.includes("ipwho.is")) throw new Error("lookup unavailable");
@@ -246,15 +264,24 @@ test("visit verification precedes storage and geolocation; failures cannot lose 
     throw new Error("unexpected call");
   });
   assert.equal((await handler(visitRequest())).status, 202);
-  assert(calls[0].includes("siteverify"));
-  assert(calls[1].includes("record_visitor_visit"));
+  assert(calls[0].includes("record_visitor_visit"));
+  assert(!calls.some((url) => url.includes("siteverify")));
   let writes = 0;
   const rejected = createVisitHandler(env, async () => {
     writes++;
     return Response.json({ success: false });
   });
-  assert.equal((await rejected(visitRequest())).status, 400);
-  assert.equal(writes, 1);
+  const badOrigin = new Request(visitRequest(), {
+    headers: { origin: "https://other.example", "Content-Type": "application/json" },
+  });
+  assert.equal((await rejected(badOrigin)).status, 403);
+  const badSession = new Request(visitRequest().url, {
+    method: "POST",
+    headers: { origin, "Content-Type": "application/json" },
+    body: JSON.stringify({ session: "invalid" }),
+  });
+  assert.equal((await rejected(badSession)).status, 400);
+  assert.equal(writes, 0);
   assert.equal(
     reportedIp(
       new Request("https://test", {
