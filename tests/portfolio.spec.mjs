@@ -1,6 +1,17 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+// Layout/navigation checks must not depend on a live anti-bot challenge or
+// write visit records. Verification and submission states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/contact-config.js", (route) =>
+    route.fulfill({
+      contentType: "text/javascript",
+      body: 'export const contactConfig={endpoint:"",turnstileSiteKey:""};',
+    }),
+  );
+});
+
 test("current identity, working assets, and accessible desktop content", async ({
   page,
 }) => {
