@@ -1,0 +1,13 @@
+project_id = "hao-portfolio"
+
+[functions.submit-message]
+verify_jwt = false
+entrypoint = "./functions/submit-message/index.js"
+
+[functions.track-visit]
+verify_jwt = false
+entrypoint = "./functions/track-visit/index.js"
+
+[functions.weekly-digest]
+verify_jwt = false
+entrypoint = "./functions/weekly-digest/index.js"

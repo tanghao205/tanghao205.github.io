@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">AI tools mark</title>
+  <desc id="desc">AI initials in a rounded square with four connected points</desc>
+  <rect width="160" height="160" rx="32" fill="#164a55"/>
+  <path d="M29 43h102M29 117h102" stroke="#9ac2ca" stroke-width="1.5" opacity=".55"/>
+  <circle cx="29" cy="43" r="5" fill="#d26b43"/>
+  <circle cx="131" cy="43" r="5" fill="#9ac2ca"/>
+  <circle cx="29" cy="117" r="5" fill="#9ac2ca"/>
+  <circle cx="131" cy="117" r="5" fill="#d26b43"/>
+  <text x="80" y="101" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-6">AI</text>
+</svg>

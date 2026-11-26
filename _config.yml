@@ -163,6 +163,13 @@ include:
   - .htaccess
   - _pages
 exclude:
+  - private
+  - build
+  - dist
+  - scripts
+  - tests
+  - "*Resume*.docx"
+  - "*Resume*.docs"
   - "*.sublime-project"
   - "*.sublime-workspace"
   - vendor

@@ -1,0 +1,31 @@
+# Personal source material: never commit or publish.
+/private/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*Resume*.doc
+*Resume*.docx
+*Resume*.docs
+*Resume*.pdf
+*resume*.doc
+*resume*.docx
+*resume*.docs
+*resume*.pdf
+
+# Local tooling and generated output.
+/.idea/
+/node_modules/
+/dist/
+/build/
+/_site/
+/.preview/
+/supabase/.temp/
+/supabase/.branches/
+/test-results/
+/playwright-report/
+/.bundle/
+/.jekyll-cache/
+/.sass-cache/
+*.log
+.env
+.env.*
