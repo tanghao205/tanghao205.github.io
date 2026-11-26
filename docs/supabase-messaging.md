@@ -83,15 +83,19 @@ Detailed examples and steps: `private/messaging-flow.md` → “Adjust IP/locati
 and visit retention.” Migrations `202611260003` and `202611260004` install
 finite/unlimited configuration. No Edge Function redeployment is needed.
 
-`visitor_visits` records one verified visit per tab session per UTC day. The
-browser sends a random session UUID and a separate Turnstile token with action
-`portfolio-visit`. There is no public visit-reading API. Do Not Track and Global
-Privacy Control skip tracking. Visit verification is abandoned if it requires
-human interaction, so analytics never asks readers to solve an extra challenge.
-The separate message verification can still request interaction. Blocked verification and unavailable
-session storage also skip tracking; counts represent recorded sessions, not
-people or all page views. The server caps visit attempts at 20 per reported
-network hash/hour and 500 globally/hour, separately from message limits.
+`visitor_visits` records one approximate visit per tab session per UTC day. The
+browser sends a random session UUID as soon as the configured page loads,
+independently of the message CAPTCHA. The owner explicitly approved removing
+CAPTCHA verification from visit counting after a live browser trace reproduced
+an interactive challenge followed by no visit request. The message endpoint
+still requires its existing Turnstile verification. There is no public
+visit-reading API. Do Not Track and Global Privacy Control skip tracking.
+Unavailable session storage, blocked requests, and network errors can also
+reduce the count. Visit requests are not authenticated; bots or spoofed requests
+can affect totals. They estimate sessions, not verified people or all page views.
+The server caps visit attempts at 20 per reported network hash/hour and 500
+globally/hour, separately from message limits. The reported address may be a
+shared proxy, so the network cap can also affect several visitors together.
 
 Messages and visits get best-effort `reported_ip`, `approximate_location`, and
 `network_recorded_at` fields. The reported IP is the rightmost valid address in
@@ -113,7 +117,7 @@ because the handler checks that credential itself. No public digest endpoint
 can trigger email without it.
 
 Hosted schema and both Cron schedules were inspected on November 26. The live
-visit endpoint rejects an invalid token (400); the digest rejects unauthorized
+original visit endpoint rejected an invalid token (400); the digest rejects unauthorized
 requests (401). A real automated browser visit required interactive verification
 and was not recorded; manual real-browser visit/IP/location confirmation remains
 outstanding. Desktop and mobile layouts were inspected without horizontal

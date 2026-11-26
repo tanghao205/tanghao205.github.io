@@ -330,3 +330,24 @@ legacy root publishing to the prepared Actions workflow. Publish only the
 allowlisted dist artifact and verify workflow completion and the live page.
 Private source notes, runtime secrets, and local preview artifacts remain
 excluded. No additional permission is needed to complete this authorized release.
+
+Subsequent owner direction supersedes public hosting: make all eight repositories
+under tanghao205 private, including tanghao205.github.io. All eight were changed
+and verified private. GitHub Pages was automatically unpublished; the former
+public site returns 404. Do not make any repository public again or restore
+public hosting without owner authorization. Supabase and the local preview were
+not disabled. The browser must be signed into the owning tanghao205 account or
+another explicitly authorized collaborator account to view the private sources.
+
+The owner then explicitly authorized making only tanghao205.github.io public
+again to restore free Pages hosting. The seven other repositories remain
+private. Pages was re-enabled with the existing Actions workflow and a manual
+deployment was triggered. Do not change the other repositories' visibility.
+
+The owner reported that live messages saved but visits did not appear. Runtime
+evidence showed the visit widget's interactive-challenge callback stopping all
+visit requests. The owner explicitly approved automatic rate-limited visit
+counting without CAPTCHA, while retaining message CAPTCHA, privacy preferences,
+daily tab-session deduplication, and server write caps. He then authorized a PR,
+backend deployment, and merging/publication after checks pass. Treat counts and
+network metadata as estimates; the reported gateway IP is not verified identity.

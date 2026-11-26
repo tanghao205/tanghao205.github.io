@@ -19,12 +19,7 @@ export function createVisitHandler(env, fetcher = fetch) {
     const reply = (status) => new Response(null, { status, headers });
     if (request.method === "OPTIONS") return reply(204);
     if (request.method !== "POST") return reply(405);
-    if (
-      !env.TURNSTILE_SECRET_KEY ||
-      !env.RATE_LIMIT_SECRET ||
-      !env.SUPABASE_URL ||
-      !env.SUPABASE_SERVICE_ROLE_KEY
-    )
+    if (!env.RATE_LIMIT_SECRET || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY)
       return reply(503);
     if (!request.headers.get("content-type")?.startsWith("application/json"))
       return reply(415);
@@ -48,31 +43,12 @@ export function createVisitHandler(env, fetcher = fetch) {
       const input = JSON.parse(data);
       if (
         !input ||
-        typeof input.token !== "string" ||
-        !input.token ||
-        input.token.length > 2048 ||
         typeof input.session !== "string" ||
         !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(input.session)
       )
         return reply(400);
-      const verification = await fetcher(
-        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-        {
-          method: "POST",
-          body: new URLSearchParams({
-            secret: env.TURNSTILE_SECRET_KEY,
-            response: input.token,
-          }),
-          signal: AbortSignal.timeout(8000),
-        },
-      );
-      const result = verification.ok ? await verification.json() : null;
-      if (
-        !result?.success ||
-        result.action !== "portfolio-visit" ||
-        result.hostname !== new URL(origin).hostname
-      )
-        return reply(400);
+      // Visits are approximate analytics, not verified people. Database caps
+      // bound writes; messages retain their separate bot verification.
       const ip = reportedIp(request);
       const hash = await networkHash(ip || "unknown", env.RATE_LIMIT_SECRET);
       const saved = await fetcher(

@@ -18,12 +18,12 @@ function resetVerification() {
 
 if (configured) {
   status.textContent = "Checking spam protection…";
+  try {
+    trackVisit(contactConfig);
+  } catch {
+    // Visit analytics must never block message verification.
+  }
   window.portfolioTurnstileReady = () => {
-    try {
-      trackVisit(contactConfig);
-    } catch {
-      // Visit analytics must never block message verification.
-    }
     widget = window.turnstile.render("#message-verification", {
       sitekey: contactConfig.turnstileSiteKey,
       action: "portfolio-message",
