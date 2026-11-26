@@ -16,7 +16,10 @@ The owner supplied a Gmail screenshot confirming receipt on November 26.
 The initial response failed after the ledger write because the handler parsed
 an empty RPC response; that handling is fixed and regression tested.
 Verify an owned sender domain for ongoing production delivery.
-The website changes remain local, with no commit, push, or Pages deployment.
+The owner subsequently authorized pushing, merging to master, and publishing.
+Pages is configured for GitHub Actions and publishes only the public `dist/`
+artifact after checks. Verify the latest workflow run for deployment status;
+public-origin form and visit smoke checks follow a successful deployment.
 
 The detailed owner flow and email setup are in `private/messaging-flow.md`.
 That file is ignored and excluded from the public build.

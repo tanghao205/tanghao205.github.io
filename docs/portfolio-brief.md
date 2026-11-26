@@ -323,3 +323,10 @@ the portfolio work to GitHub. Use the existing `refresh-portfolio` branch;
 keep private material, secrets, IDE state, and generated output excluded.
 Opening a PR, merging to master, publishing Pages, and live hosting changes
 still require separate authorization.
+
+The owner subsequently explicitly authorized “Yes, merge and publish.” The
+reviewed branch was fast-forwarded into master, and Pages was switched from
+legacy root publishing to the prepared Actions workflow. Publish only the
+allowlisted dist artifact and verify workflow completion and the live page.
+Private source notes, runtime secrets, and local preview artifacts remain
+excluded. No additional permission is needed to complete this authorized release.

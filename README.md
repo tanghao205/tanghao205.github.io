@@ -185,7 +185,7 @@ and approximate-location collection now uses unlimited retention at the owner's
 request. Both periods can be changed in the private runtime file and applied
 with `scripts/configure-messaging.ps1`, without redeploying functions.
 Real-browser visit/geolocation confirmation and public
-Pages delivery remain unverified. The website changes remain local. See the
+Pages delivery remain to be verified after publication. See the
 Supabase messaging guide above and the private owner guide at
 `private/messaging-flow.md` (ignored, never published).
 
@@ -194,6 +194,8 @@ cannot replace review on real devices or manual assistive-technology testing.
 
 PROS content stays at the public domain level supplied by the owner; no start
 date, named customer, internal architecture, or performance claim was invented.
-The owner authorized committing and pushing the reviewed work to the
-`refresh-portfolio` branch. The Supabase backend is deployed; the website has
-not been deployed. Merging and Pages publication require separate authorization.
+The owner authorized pushing the reviewed work and merging it into `master`
+for GitHub Pages publication. Pages now uses the GitHub Actions workflow to
+publish only the explicit `dist/` public-file build. The Supabase backend is
+deployed separately. Check the latest “Portfolio checks and Pages” workflow
+run for the website's current deployment status.
