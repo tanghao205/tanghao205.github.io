@@ -10,11 +10,11 @@ The owner rejected shortened, inset strips. Use solid accent caps with square
 inner corners and only the small outer silhouette used by the Level tiles.
 Follow-up review: make the three capability cards' bottom accent bands 6px
 thick instead of 3px, retaining their full width and square inner edge.
-University labels must work on phone taps as well as desktop hover and keyboard
-activation. Use dismissible name popovers. The owner subsequently requested
-reverting the logo placement experiments: restore original centered positions,
-Illinois 20x24px / 16x20px, UF 26x26px / 23x23px, and SYSU text 9px / 7.5px
-(desktop / mobile). Keep tap-to-show names, existing slots, and name gap.
+Latest owner correction: revert all university-logo changes from PR #10,
+including custom tap/hover popovers. Restore the complete pre-PR university
+markup, styling, sizes, positions, and native title labels. Keep the approved
+corner fixes and 6px capability accent bands. The owner reviewed the local
+preview and explicitly authorized a new PR, push, and merge for this correction.
 
 The owner has authorized a Supabase contact/feedback implementation and local
 testing. See [supabase-messaging.md](supabase-messaging.md) for setup and status.

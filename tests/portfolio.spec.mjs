@@ -12,33 +12,6 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-test.describe("university labels on touch screens", () => {
-  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
-
-  test("tap reveals names, switching and outside taps dismiss them", async ({
-    page,
-  }) => {
-    await page.goto("/");
-    for (const name of ["illinois", "florida", "sysu"]) {
-      await page.locator(`[popovertarget="university-${name}"]`).tap();
-      const label = page.locator(`#university-${name}`);
-      await expect(label).toBeVisible();
-      await expect(page.locator(".university-tooltip:popover-open")).toHaveCount(1);
-      const bounds = await label.boundingBox();
-      expect(bounds.x).toBeGreaterThanOrEqual(0);
-      expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
-    }
-    await page.locator("h1").tap();
-    await expect(page.locator(".university-tooltip:popover-open")).toHaveCount(0);
-    const trigger = page.locator('[popovertarget="university-illinois"]');
-    await trigger.focus();
-    await page.keyboard.press("Enter");
-    await expect(page.locator("#university-illinois")).toBeVisible();
-    await page.keyboard.press("Escape");
-    await expect(page.locator("#university-illinois")).toBeHidden();
-  });
-});
-
 test("current identity, working assets, and accessible desktop content", async ({
   page,
 }) => {
