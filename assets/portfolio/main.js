@@ -1,6 +1,32 @@
 const navigation = document.querySelector("#navigation");
 const menuButton = document.querySelector(".menu-toggle");
 
+document.querySelectorAll(".university-trigger").forEach((button) => {
+  const label = document.getElementById(button.getAttribute("popovertarget"));
+  const positionLabel = () => {
+    const rect = button.getBoundingClientRect();
+    label.style.top = `${rect.bottom + 10}px`;
+    const width = label.getBoundingClientRect().width || Math.min(300, innerWidth - 32);
+    label.style.left = `${Math.max(16, Math.min(rect.left, innerWidth - width - 16))}px`;
+  };
+  label.addEventListener("beforetoggle", (event) => {
+    if (event.newState === "open") positionLabel();
+  });
+  label.addEventListener("toggle", () => {
+    const open = label.matches(":popover-open");
+    button.setAttribute("aria-expanded", String(open));
+    if (open) positionLabel();
+  });
+  button.addEventListener("pointerenter", (event) => {
+    if (event.pointerType === "mouse") label.showPopover();
+  });
+  button.addEventListener("pointerleave", (event) => {
+    if (event.pointerType === "mouse") label.hidePopover();
+  });
+  window.addEventListener("resize", () => label.hidePopover());
+  window.addEventListener("scroll", () => label.hidePopover(), { passive: true });
+});
+
 function closeMenu() {
   menuButton.setAttribute("aria-expanded", "false");
   navigation.classList.remove("is-open");

@@ -186,6 +186,31 @@ ul {
   display: block;
   object-fit: contain;
 }
+.university-trigger {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.university-tooltip {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-width: min(300px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 4px 16px #233b4520;
+  font-size: 14px;
+  line-height: 1.5;
+}
 .university-initials {
   font-size: 9px;
   font-weight: 650;
@@ -199,6 +224,10 @@ ul {
 .badge-illinois img {
   width: 20px;
   height: 24px;
+}
+.badge-florida img {
+  width: 26px;
+  height: 26px;
 }
 .badge-illinois,
 .badge-florida,
@@ -2432,8 +2461,21 @@ dialog::backdrop {
 }
 /* Color separates the reading depth; disclosure controls reveal practical detail. */
 .harness-section {
-  border-top: 5px solid #7053c1;
+  position: relative;
+  border-top: 1px solid #cbdadd;
+  border-radius: 6px;
   background: linear-gradient(130deg, #fff 55%, #f5f0ff);
+}
+.harness-section::before {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 5px;
+  border-radius: 6px 6px 0 0;
+  background: #7053c1;
+  content: "";
+  pointer-events: none;
 }
 .harness-heading .eyebrow {
   color: #6640a3;
@@ -2540,17 +2582,44 @@ dialog::backdrop {
   padding-top: 15px;
 }
 .harness-source {
-  border-radius: 8px;
+  position: relative;
+  border-radius: 6px;
+  border-left: 0;
+  padding-left: 26px;
   background: #eef0ff;
   border-left-color: #7053c1;
+}
+.harness-source::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  border-radius: 6px 0 0 6px;
+  background: #7053c1;
+  content: "";
+  pointer-events: none;
 }
 .harness-source span {
   color: #59438c;
 }
 .harness-handoff {
-  border-radius: 10px;
+  position: relative;
+  border-radius: 6px;
   background: #e6effb;
-  border-left-color: #437bbd;
+  border-left: 0;
+  padding-left: 26px;
+}
+.harness-handoff::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  border-radius: 6px 0 0 6px;
+  background: #437bbd;
+  content: "";
+  pointer-events: none;
 }
 .harness-handoff span {
   color: #245b94;
@@ -3201,6 +3270,7 @@ dialog::backdrop {
   line-height: 1.5;
 }
 .focus-capabilities > div {
+  position: relative;
   padding: 22px;
   border: 1px solid #cdd9e5;
   border-radius: 6px;
@@ -3233,13 +3303,24 @@ dialog::backdrop {
   line-height: 1.6;
 }
 .capability-data {
-  border-bottom: 3px solid #e85843 !important;
+  --capability-accent: #e85843;
 }
 .capability-software {
-  border-bottom: 3px solid #208c9a !important;
+  --capability-accent: #208c9a;
 }
 .capability-model {
-  border-bottom: 3px solid #8260b5 !important;
+  --capability-accent: #8260b5;
+}
+.focus-capabilities > div::after {
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  height: 6px;
+  border-radius: 0 0 6px 6px;
+  background: var(--capability-accent);
+  content: "";
+  pointer-events: none;
 }
 .capability-caption {
   display: block;
