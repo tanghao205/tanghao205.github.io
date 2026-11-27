@@ -186,31 +186,6 @@ ul {
   display: block;
   object-fit: contain;
 }
-.university-trigger {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-.university-tooltip {
-  position: fixed;
-  inset: auto;
-  margin: 0;
-  max-width: min(300px, calc(100vw - 32px));
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--ink);
-  box-shadow: 0 4px 16px #233b4520;
-  font-size: 14px;
-  line-height: 1.5;
-}
 .university-initials {
   font-size: 9px;
   font-weight: 650;
@@ -224,10 +199,6 @@ ul {
 .badge-illinois img {
   width: 20px;
   height: 24px;
-}
-.badge-florida img {
-  width: 26px;
-  height: 26px;
 }
 .badge-illinois,
 .badge-florida,
