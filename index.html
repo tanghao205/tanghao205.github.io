@@ -29,31 +29,61 @@
         <div class="header-identity">
           <a class="brand" href="#home" aria-label="Hao Tang, home">Hao Tang</a>
           <ul class="university-badges" aria-label="Universities">
-            <li
-              class="university-badge badge-illinois"
-              title="University of Illinois Urbana-Champaign"
-            >
-              <img
-                src="/assets/portfolio/uiuc-orange.svg"
-                alt="University of Illinois Urbana-Champaign"
-                width="20"
-                height="24"
-              />
+            <li class="university-badge badge-illinois">
+              <button
+                class="university-trigger"
+                type="button"
+                popovertarget="university-illinois"
+                aria-label="University of Illinois Urbana-Champaign"
+                aria-expanded="false"
+              >
+                <img
+                  src="/assets/portfolio/uiuc-orange.svg"
+                  alt="University of Illinois Urbana-Champaign"
+                  width="20"
+                  height="24"
+                />
+              </button>
+              <span id="university-illinois" class="university-tooltip" popover
+                >University of Illinois Urbana-Champaign</span
+              >
             </li>
-            <li class="university-badge badge-florida" title="University of Florida">
-              <img
-                src="/assets/portfolio/uf-monogram.svg"
-                alt="University of Florida"
-                width="26"
-                height="26"
-              />
+            <li class="university-badge badge-florida">
+              <button
+                class="university-trigger"
+                type="button"
+                popovertarget="university-florida"
+                aria-label="University of Florida"
+                aria-expanded="false"
+              >
+                <img
+                  src="/assets/portfolio/uf-monogram.svg"
+                  alt="University of Florida"
+                  width="26"
+                  height="26"
+                />
+              </button>
+              <span id="university-florida" class="university-tooltip" popover
+                >University of Florida</span
+              >
             </li>
-            <li class="university-badge badge-sysu" title="Sun Yat-sen University">
-              <span
-                class="university-initials"
-                role="img"
+            <li class="university-badge badge-sysu">
+              <button
+                class="university-trigger"
+                type="button"
+                popovertarget="university-sysu"
                 aria-label="Sun Yat-sen University"
-                >SYSU</span
+                aria-expanded="false"
+              >
+                <span
+                  class="university-initials"
+                  role="img"
+                  aria-label="Sun Yat-sen University"
+                  >SYSU</span
+                >
+              </button>
+              <span id="university-sysu" class="university-tooltip" popover
+                >Sun Yat-sen University</span
               >
             </li>
           </ul>

@@ -39,7 +39,12 @@ and publishing.
 - Inner reading cards use the same small 6px corner radius and colored top
   border treatment as supporting work cards. Keep this consistent; rejected
   experiments include large rounded top stripes and square upper corners with
-  rounded lower corners. The outer AI section can retain its larger radius.
+  rounded lower corners. Latest review: the outer AI section also uses 6px.
+  Its top accent, capability cards' bottom accents, and source/work-handoff
+  left accents span the entire edge. Use solid caps with square inner corners
+  and a small outer silhouette matching the Level tiles. Shortened inset
+  strips were explicitly rejected.
+  Capability cards use a thicker 6px bottom accent band per the latest review.
 - Supporting work cards have small vehicle images with equal image heights.
   Use grid stretching to keep the two cards equal in height on desktop, including
   when a story expands. Allow natural heights when stacked on mobile.
